@@ -1,0 +1,13 @@
+20/02
+
+Vi har bestämt oss för att göra en CHIP-8 Emulator
+
+
+21/02
+
+Vi har strukturerat och delat upp gurpparbetet.
+Vi har skapat github repo, trello board, overleaf rapport mall och biolerplate kod.
+Vi har haft möte med vår coach Sanna.
+
+
+

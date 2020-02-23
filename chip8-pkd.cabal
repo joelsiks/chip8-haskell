@@ -18,7 +18,10 @@ extra-source-files:  CHANGELOG.md, README.md
 
 executable chip8-pkd
   main-is:             main.hs
-  -- other-modules:
+  other-modules:       CPU.CPU
+                       CPU.Emulate
+                       CPU.LoadRom
+                       Render.Renderer
   -- other-extensions:
   build-depends:       base ^>=4.12.0.0
   hs-source-dirs:      src

@@ -1,6 +1,10 @@
 
 module CPU.CPU where
 
+import System.IO
+import CPU.LoadRom
+
+
 type Opcode = (Int, Int, Int, Int)
 
 {- Represents a centralised state for the CPU of the CHIP-8.
@@ -37,6 +41,30 @@ initCPU = Cpu { opcode = (0, 0, 0, 0)
               , vram = replicate 10 []
               , keyboard = replicate 16 False
               }
+
+{- initMemory path
+     Loads the fontset and a program onto the processors memory
+
+     PRE:  path leads to a valid FilePath
+     RETURNS: fontset ++ (zeros up to adress 0x200) ++ program ++ (zeros to fill out rest of memory)
+     SIDE EFFECTS: Reads the file at path, exception thrown if it does not exist
+     EXAMPLES: initMemory (FilePath with text file containing 3 characters) = fontset ++ (zeros to index 512) ++ [13,10,35] ++ (zeros to index 4096)
+  -}
+initMemory :: FilePath -> [Int]
+initMemory path = fontset ++ (replicate (0x200 - length fontset) 0) ++ (padRom $ CPU.LoadRom.readRom path)
+
+{- padRom rom
+     Pads rom with empty data to fill up memory
+
+     RETURNS: a list of length 3854 consisting of rom ++ (replicate (3854 - length rom) 0)
+     EXAMPLES: readRom [1,2,3,4] = [1,2,3,4] ++ (replicate 3850 0)
+  -}
+padRom :: [Int] -> [Int]
+padRom rom
+    | memLeft < 0 = error "Program too large"
+    | rom == [] = error "File error"
+    | otherwise = rom ++ (replicate memLeft 0)
+        where memLeft = 0xE00 - length rom
 
 -- Fontset for drawing characters to the screen.
 fontset :: [Int]

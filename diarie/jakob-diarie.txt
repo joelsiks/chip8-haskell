@@ -1,0 +1,12 @@
+20/02 
+- Vi har bestämt oss för att göra en CHIP-8 Emulator
+
+21/02 12:00 - 14:00
+- Vi har strukturerat och delat upp gurpparbetet.
+- Vi har skapat github repo, trello board, overleaf rapport mall och biolerplate kod.
+- Vi har haft möte med vår coach Sanna.
+
+21/02 17:00 - 20:00
+- Studering av Gloss och SDL2, Gloss valdes då Gloss har mer dokumentation och 
+  Gloss-bitmaps löste problem med att måla inviduella pixlar.
+- Implemation av Gloss i Renderer.hs väntar på komentarer från de andra.

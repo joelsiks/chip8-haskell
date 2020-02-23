@@ -1,14 +1,15 @@
-module Render.Renderer (DisplaySettings,HandleKeyFunc,UpdateFunc,RendererFunc,GameState,startRenderer) where
+module Render.Renderer (DisplaySettings,HandleKeyFunc,UpdateFunc,RendererFunc,CPU,startRenderer) where
 
+import CPU.CPU
 import Graphics.Gloss
 import Graphics.Gloss.Data.ViewPort
 import Graphics.Gloss.Interface.IO.Game
 import Data.Word
 import Data.ByteString (ByteString, pack) -- Same as a bitmap
 
-type HandleKeyFunc = Char -> GameState -> GameState
-type UpdateFunc = Float -> GameState -> GameState
-type RendererFunc = GameState -> [[Bool]]
+type HandleKeyFunc = Char -> CPU -> CPU
+type UpdateFunc = Float -> CPU -> CPU
+type RendererFunc = CPU -> [[Bool]]
 
 
 data DisplaySettings = Settings
@@ -19,8 +20,6 @@ data DisplaySettings = Settings
         fps        :: Int
     } deriving (Show)
 st = Settings "Game" (64,32) blue 60
-
-data GameState = State
 
 createFrame :: DisplaySettings -> [[Bool]] -> Picture
 createFrame s pixels = bitmapOfByteString sizeX sizeY (BitmapFormat (TopToBottom) (PxRGBA)) bitmapData False
@@ -41,14 +40,14 @@ createFrame s pixels = bitmapOfByteString sizeX sizeY (BitmapFormat (TopToBottom
 window :: DisplaySettings -> Display
 window s = InWindow (name s) (size s) (0,0)
 
-renderer :: DisplaySettings -> RendererFunc -> GameState -> Picture
+renderer :: DisplaySettings -> RendererFunc -> CPU -> Picture
 renderer s f state = createFrame s $ f state
 
-handleKeys :: HandleKeyFunc -> Event -> GameState -> GameState
+handleKeys :: HandleKeyFunc -> Event -> CPU -> CPU
 handleKeys f (EventKey (Char key) Down _ _) game = f key game
 handleKeys _ _ game = game
 
-startRenderer :: DisplaySettings -> GameState -> RendererFunc -> HandleKeyFunc -> UpdateFunc -> IO()
+startRenderer :: DisplaySettings -> CPU -> RendererFunc -> HandleKeyFunc -> UpdateFunc -> IO()
 startRenderer s gS rF hF uF = play (window s) (background s) (fps s) gS (renderer s rF) (handleKeys hF) uF 
 
 {-

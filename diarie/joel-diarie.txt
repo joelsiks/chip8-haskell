@@ -21,3 +21,17 @@ Vi har träffat vår supertrevliga coach Sanna och presenterat vårt projekt.
 Har undersökt hur vi ska använda record syntax för CPU och hur vi kan ändra på specifika värden m.h.a record syntax.
 Har lagt till modul deklarationer för alla filer vi har lagt till preliminärt och sett till att de inkluderats i projektets
 cabal fil.
+
+23/02 13:30-14:00
+
+Har undersökt hur vi ska tolka opcodes och utföra de instruktioner som opcodes:en representerar. Har börjat med att
+implementera funktionen "fetchOpcode" för att hämta en opcode från minnet.
+Administrativt har jag strukturerat upp cabal infrastrukturen där saker har lagts till i .cabal filen för
+att man smidigt ska kunna använda "cabal run" för att köra projektet.
+
+23/02 16:30-18:00
+
+Har börjat med att implementera funktionen "executeOpcode" som är den del av CPUn som kommer att utföra alla operationer.
+Det är många olika instruktioner som ska implementeras och det gäller att hålla tungan rätt i mun. Blir det fel här
+är det väldigt svårt att ta reda på senare. Nästa steg som återstår är att implementera färdigt "executeOpcode" samt
+implementera test fall för alla eller många av instruktionerna.

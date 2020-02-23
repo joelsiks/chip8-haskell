@@ -1,4 +1,4 @@
-module Render.Renderer (DisplaySettings,HandleKeyFunc,UpdateFunc,RendererFunc,CPU,startRenderer) where
+module Render.Renderer (DisplaySettings,HandleKeyFunc,UpdateFunc,RendererFunc,startRenderer) where
 
 import CPU.CPU
 import Graphics.Gloss

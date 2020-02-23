@@ -9,12 +9,11 @@ type Opcode = (Int, Int, Int, Int)
 
    INVARIANT: TODO
 -}
-data CPU = Cpu { opcode :: Opcode   -- Current opcode.
-               , v :: [Int]         -- V Register containing 16 8-bit registrars. Index 0, 1, 2 ... E, F.
+data CPU = Cpu { v :: [Int]         -- V Register containing 16 8-bit registrars. Index 0, 1, 2 ... E, F.
                , i :: Int           -- 16 bit register for memory address.
                , sound_timer :: Int 
                , delay_timer :: Int 
-               , pc :: Int          -- Pointer to memory for current opcode.
+               , pc :: Int          -- Pointer to memory for current opcode. 0 =< pc =< 4095
                , memory :: [Int]    -- Place to store program data (instructions). 4096 bytes.
                , stack :: [Int]     -- Stack
                , sp :: Int          -- Pointer to current place in the stack.
@@ -25,8 +24,7 @@ data CPU = Cpu { opcode :: Opcode   -- Current opcode.
 -- Returns a fresh state of the CPU where all of its values has been
 -- set to their initial values.
 initCPU :: CPU
-initCPU = Cpu { opcode = (0, 0, 0, 0)
-              , v = replicate 16 0
+initCPU = Cpu { v = replicate 16 0
               , i = 0x200
               , sound_timer = 0
               , delay_timer = 0

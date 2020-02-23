@@ -2,7 +2,6 @@ module CPU.LoadRom(readRom) where
 
 import System.IO
 import qualified Data.ByteString as B
-import Data.Word
 
 path = "../../roms/PONG"
 readRom :: FilePath -> IO [Int]

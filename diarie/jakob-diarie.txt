@@ -10,3 +10,7 @@
 - Studering av Gloss och SDL2, Gloss valdes då Gloss har mer dokumentation och 
   Gloss-bitmaps löste problem med att måla inviduella pixlar.
 - Implemation av Gloss i Renderer.hs väntar på komentarer från de andra.
+
+23/02 16:00 - 17:30
+- Implemented the CPU class in Renderer.hs
+- Added documentation in Renderer.hs

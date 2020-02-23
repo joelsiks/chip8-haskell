@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-
-module Render.Renderer where
-=======
 module Renderer (DisplaySettings,HandleKeyFunc,UpdateFunc,RendererFunc,GameState,startRenderer) where
 
 import Graphics.Gloss
@@ -65,4 +61,3 @@ for a eqs eqa io = do
         io
         for (eqa a) eqs eqa io
     else do (return ())
->>>>>>> 19eec01e90776d19a68d48295653d2c5415ce409

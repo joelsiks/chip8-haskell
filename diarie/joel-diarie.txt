@@ -4,7 +4,7 @@
 Idag har vi inom gruppen bestämt att vi ska göra en CHIP-8 Emulato :)
 
 
-21/02 12.00-13.15
+21/02 12:00-13:15
 
 Vi har tillsammans i gruppen suttit ner och strukturerat upp projektet. Vi har fördelat arbete inom gruppen, skapat github repo,
 trello board samt skapat boilerplate kod. 
@@ -12,8 +12,12 @@ trello board samt skapat boilerplate kod.
 Vi har även skapat ett overleaf dokument för vår rapport där vi färdigställt en mall att utgå ifrån.
 
 
-21/02 13.15
+21/02 13:15
 
 Vi har träffat vår supertrevliga coach Sanna och presenterat vårt projekt.
 
+23/02 12:30-13:30
 
+Har undersökt hur vi ska använda record syntax för CPU och hur vi kan ändra på specifika värden m.h.a record syntax.
+Har lagt till modul deklarationer för alla filer vi har lagt till preliminärt och sett till att de inkluderats i projektets
+cabal fil.

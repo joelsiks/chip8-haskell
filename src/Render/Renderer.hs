@@ -1,4 +1,4 @@
-module Renderer (DisplaySettings,HandleKeyFunc,UpdateFunc,RendererFunc,GameState,startRenderer) where
+module Render.Renderer (DisplaySettings,HandleKeyFunc,UpdateFunc,RendererFunc,GameState,startRenderer) where
 
 import Graphics.Gloss
 import Graphics.Gloss.Data.ViewPort

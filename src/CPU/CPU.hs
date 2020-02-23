@@ -1,31 +1,37 @@
 
-data CPU = Cpu { 
-    opcode :: (Int, Int, Int, Int), -- Current opcode.
-    v :: [Int],                     -- V Register containing 16 8-bit registrars. Index 0, 1, 2 ... E, F.
-    i :: Int,                       -- 16 bit register for memory address.
-    sound_timer :: Int,             
-    delay_timer :: Int,             
-    pc :: Int,                      -- Place in memory for current opcode.
-    memory :: [Int],                -- Stored program. 4096 bytes.
-    stack :: [Int] ,                -- Stack
-    sp :: Int,                      -- Place in the stack right now.
-    vram :: [[Int]],                -- Memory containing what pixels are to be drawed on the screen.
-    keyboard :: [Bool]              -- List with bools representing if a certain key has been pressed.
-    } deriving (Show)
+module CPU.CPU where
 
--- Returns a newly generated instance of a CPU.
-initializeCpu :: CPU
-initializeCpu = Cpu {
-                  opcode = 0,
-                  v = replicate 16 0,
-                  i = 0x200,
-                  sound_timer = 0,
-                  delay_timer = 0,
-                  pc = 0x200,
-                  memory = replicate 4096 0,
-                  stack = replicate 16 0,
-                  sp = 0,
-                  vram = replicate 10 [],
-                  keyboard = replicate 16 False
-                  }
+{- Represents a centralised state for the CPU of the CHIP-8.
+   The CHIP-8's state is the inner workings of the computer. It holds all the necessary data
+   that it needs to have in order to execute any instructions and to interpret any data.
 
+   INVARIANT: TODO
+-}
+data CPU = Cpu { opcode :: (Int, Int, Int, Int) -- Current opcode.
+               , v :: [Int]                     -- V Register containing 16 8-bit registrars. Index 0, 1, 2 ... E, F.
+               , i :: Int                       -- 16 bit register for memory address.
+               , sound_timer :: Int             
+               , delay_timer :: Int             
+               , pc :: Int                      -- Pointer to memory for current opcode.
+               , memory :: [Int]                -- Place to store program data (instructions). 4096 bytes.
+               , stack :: [Int]                 -- Stack
+               , sp :: Int                      -- Pointer to current place in the stack.
+               , vram :: [[Int]]                -- Memory containing what pixels are to be drawed on the screen.
+               , keyboard :: [Bool]             -- List with bools representing if a certain key has been pressed.
+               } deriving (Show)
+
+-- Returns a fresh state of the CPU where all of its values has been
+-- set to their initial values.
+initCPU :: CPU
+initCPU = Cpu { opcode = (0, 0, 0, 0)
+              , v = replicate 16 0
+              , i = 0x200
+              , sound_timer = 0
+              , delay_timer = 0
+              , pc = 0x200
+              , memory = replicate 4096 0
+              , stack = replicate 16 0
+              , sp = 0
+              , vram = replicate 10 []
+              , keyboard = replicate 16 False
+              }

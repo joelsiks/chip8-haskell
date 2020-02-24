@@ -14,9 +14,10 @@ main = do
     let cpu = CPU.CPU.initCPU rom (mkStdGen 0)
     -- bätre slumpgenerering
     -- skicka vidare CPU här
+    putStrLn "Hello, World!"
 
-    let displaySettings = Settings "Test" blue 60
-    startRenderer displaySettings cpu onRender onInput onUpdate
+    --let displaySettings = Settings "Test" blue 60
+    --startRenderer displaySettings cpu onRender onInput onUpdate
 
 -- Called last every frame
 onRender :: CPU -> [Int]

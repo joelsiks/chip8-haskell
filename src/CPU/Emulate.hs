@@ -94,15 +94,14 @@ executeOpcode cpu opcode =
     (0xA, _, _, _) ->
       nextPC $ cpu {i = opNNN opcode}
     (0xB, _, _, _) ->
-      nextPC $ jumpToAddress cpu (v cpu !! 0 + opNNN opcode)
+      nextPC $ jumpToAddress cpu (head (v cpu) + opNNN opcode)
     (0xC, x, _, _) ->
       nextPC $ setRegister ucpu x (randomValue .&. opNN opcode)
         where
           (randomValue, newStdGen) = randomR (0, 255) (rgen cpu)
           ucpu = cpu {rgen = newStdGen}
     (0xD, x, y, n) ->
-      -- TODO
-      cpu
+      nextPC $ drawSprite cpu x y n
     (0xE, x, 0x9, 0xE) ->
       nextPC $ skipInstructionIf cpu (keyboard cpu !! (v cpu !! x))
     (0xE, x, 0xA, 0x1) ->
@@ -146,7 +145,7 @@ skipInstructionIf cpu pred | pred      = nextPC cpu
 
 -- Clears the screen by replacing the vram with an empty copy.
 clearScreen :: CPU -> CPU
-clearScreen cpu = cpu {vram = replicate 32 (replicate 64 0)}
+clearScreen cpu = cpu {vram = defaultVRAM}
 
 -- Calls a subroutine by inserting the current position into the stack and jumping to
 -- a specific address.
@@ -164,15 +163,15 @@ returnFromSubroutine cpu = jumpToAddress ucpu (stack ucpu !! sp ucpu)
 -- and increases the stack pointer by 1.
 insertToStack :: CPU -> Int -> CPU
 insertToStack cpu val = ucpu {sp = sp cpu + 1}
-  where ucpu = cpu {stack = (element (sp cpu) .~ val) (stack cpu)}
+  where ucpu = cpu {stack = replace (sp cpu) val (stack cpu)}
 
 -- Sets the register at idx to val.
 setRegister :: CPU -> Int -> Int -> CPU
-setRegister cpu idx val = cpu {v = (element idx .~ val) (v cpu)}
+setRegister cpu idx val = cpu {v = replace idx val (v cpu)}
 
 -- Sets the memory position at pos to val.
 setMemory :: CPU -> Int -> Int -> CPU
-setMemory cpu pos val = cpu {memory = (element pos .~ val) (memory cpu)}
+setMemory cpu pos val = cpu {memory = replace pos val (memory cpu)}
 
 -- Stores the binary representation of the value located in (v cpu) at index idx to the memory.
 storeBinaryRepresentation :: CPU -> Int -> CPU
@@ -193,6 +192,45 @@ loadRegisters :: CPU -> Int -> CPU
 loadRegisters cpu idx | idx == 0  = ucpu
                       | otherwise = loadRegisters ucpu (idx - 1)
                         where ucpu = setRegister cpu idx (memory cpu !! i cpu + idx)
+
+{- replace idx val list
+   Replaces a value at a given index in a list with another value.
+
+   PRE: 0 <= idx <= length list
+   RETURNS: list where the value at index idx has been replaced with val.
+   EXAMPLES: replace 0 3 [1,2,3] = [3,2,3]
+             replace 1 3 [1,1,1] = [1,3,1]
+-}
+replace :: Int -> a -> [a] -> [a]
+replace idx val = element idx .~ val
+
+{- nestedListIndexes rows cols
+   Calculates all possible indexes from a pair of rows and cols.
+
+   RETURNS: [(x,y) | x <- [0..cols], y <- [0..rows]]
+   EXAMPLES: nestedListIndexes 1 1 = [(0,0),(0,1),(1,0),(1,1)]
+             nestedListIndexes 1 2 = [(0,0),(0,1),(1,0),(1,1),(2,0),(2,1)]
+-}
+nestedListIndexes :: Int -> Int -> [(Int, Int)]
+nestedListIndexes rows cols = [(col, row) | col <- [0..cols], row <- [0..rows]]
+
+drawSprite :: CPU -> Int -> Int -> Int -> CPU
+drawSprite cpu x y times = drawSprite' (nestedListIndexes times 8) cpu x y
+  where
+    drawSprite' [] cpu _ _ = cpu
+    drawSprite' ((col, row):xs) cpu x y = let
+                                            y2 = (v cpu !! y + row) `mod` windowHeight
+                                            x2 = (v cpu !! x + col) `mod` windowWidth
+                                            output = shiftR (memory cpu !! (i cpu + row)) (7 - col) .&. 1
+                                          in 
+                                            drawSprite' xs (xorVram cpu x2 y2 output) x y
+
+xorVram :: CPU -> Int -> Int -> Int -> CPU
+xorVram cpu x y val = cpu {vram = let 
+                                    oldVal = (vram cpu !! y) !! x
+                                    newRow = replace x (xor oldVal val) (vram cpu !! y) 
+                                  in 
+                                    replace y newRow (vram cpu)}
 
 opNNN :: Opcode -> Int
 opNNN (_, x, y, z) = shift x 8 + shift y 4 + z

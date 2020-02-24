@@ -5,6 +5,9 @@ import System.IO
 import CPU.LoadRom
 import System.Random
 
+windowHeight = 32
+windowWidth  = 64
+
 {- Represents a centralised state for the CPU of the CHIP-8.
    The CHIP-8's state is the inner workings of the computer. It holds all the necessary data
    that it needs to have in order to execute any instructions and to interpret any data.
@@ -36,11 +39,14 @@ initCPU rom randomgen = Cpu { v = replicate 16 0
                         , memory = initMemory rom
                         , stack = replicate 16 0
                         , sp = 0
-                        , vram = replicate 32 (replicate 64 0)
+                        , vram = defaultVRAM
                         , keyboard = replicate 16 False
                         , keypad_waiting = False
                         , rgen = randomgen
                         }
+
+defaultVRAM :: [[Int]]
+defaultVRAM = replicate windowHeight (replicate windowWidth 0)
 
 {- initMemory rom
      Loads the fontset and a program onto the processors memory

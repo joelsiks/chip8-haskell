@@ -2,7 +2,7 @@
 
 2020-02-21 12:00-13:15 Planering i gruppen där vi strukturerade upp projektet i delar, delade ut arbetet och skapade trello/github repo.
 
-2020-02-21 13:15-13:30 Möte med coach sanna där vi disskuterade 
+2020-02-21 13:15-13:30 Möte med coach sanna där vi diskuterade projektet.
 
 2020-02-21 13:30-14:00 Fortsatt planering där LaTeX dokument sattes upp och de första uppgifterna distribuerades. Mitt första mål är att läsa in ROM-filer och lagra i programmets minne.
 
@@ -12,3 +12,5 @@
 		       Implementering av förbättrad inlänsingsfunktion där [Int] returneras istället för IO [Int] och checks så att funktionen säkert kan returnera [Int]
 		       Implementering av initilisationsfunktion för minnet där program och font läses in
                        Funktionspecifikation för majoriteten av de skrivna funktionerna
+
+2020-02-24 14:15-14:40 Bortagning av osäkra funktioner och primitiv initialisering av CPUn.

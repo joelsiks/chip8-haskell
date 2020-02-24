@@ -27,13 +27,13 @@ data CPU = Cpu { v :: [Int]             -- V Register containing 16 8-bit regist
 
 -- Returns a fresh state of the CPU where all of its values has been
 -- set to their initial values.
-initCPU :: StdGen -> CPU
-initCPU randomgen = Cpu { v = replicate 16 0
+initCPU :: [Int] -> StdGen -> CPU
+initCPU rom randomgen = Cpu { v = replicate 16 0
                         , i = 0x200
                         , sound_timer = 0
                         , delay_timer = 0
                         , pc = 0x200
-                        , memory = replicate 4096 0
+                        , memory = initMemory rom
                         , stack = replicate 16 0
                         , sp = 0
                         , vram = replicate 32 (replicate 64 0)
@@ -42,16 +42,14 @@ initCPU randomgen = Cpu { v = replicate 16 0
                         , rgen = randomgen
                         }
 
-{- initMemory path
+{- initMemory rom
      Loads the fontset and a program onto the processors memory
 
-     PRE:  path leads to a valid FilePath
      RETURNS: fontset ++ (zeros up to adress 0x200) ++ program ++ (zeros to fill out rest of memory)
-     SIDE EFFECTS: Reads the file at path, exception thrown if it does not exist
-     EXAMPLES: initMemory (FilePath with text file containing 3 characters) = fontset ++ (zeros to index 512) ++ [13,10,35] ++ (zeros to index 4096)
+     EXAMPLES: initMemory ('rom' containing 3 characters) = fontset ++ (zeros to index 512) ++ [13,10,35] ++ (zeros to index 4096)
   -}
-initMemory :: FilePath -> [Int]
-initMemory path = fontset ++ (replicate (0x200 - length fontset) 0) ++ (padRom $ CPU.LoadRom.readRom path)
+initMemory :: [Int] -> [Int]
+initMemory rom = fontset ++ (replicate (0x200 - length fontset) 0) ++ padRom rom
 
 {- padRom rom
      Pads rom with empty data to fill up memory

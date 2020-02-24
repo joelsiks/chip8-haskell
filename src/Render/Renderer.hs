@@ -24,20 +24,20 @@ data DisplaySettings = Settings
     PRE: The number of pixels is equal to the number of pixels required for the given screen size from settings
     RETURNS: A renderer readable picture created from the given pixels
 -}
-createFrame :: DisplaySettings -> [[Bool]] -> Picture
+createFrame :: DisplaySettings -> [Int] -> Picture
 createFrame s pixels = bitmapOfByteString 64 32 (BitmapFormat (TopToBottom) (PxRGBA)) bitmapData False
     where
-        bitmapData = createBitmapData $ concat pixels
+        bitmapData = createBitmapData pixels
 
-        createBitmapData :: [Bool] -> ByteString
+        createBitmapData :: [Int] -> ByteString
         createBitmapData a = pack $ foldl f [] a
             where
                 onCollor  = [255,255,255,255] :: [Word8]
                 offCollor = [0,0,0,255]       :: [Word8]
                 
-                f :: [Word8] -> Bool -> [Word8]
-                f a True  = a ++ onCollor
-                f a _     = a ++ offCollor
+                f :: [Word8] -> Int -> [Word8]
+                f a 1 = a ++ onCollor
+                f a _ = a ++ offCollor
 
 {-  window settings
     Creates a display from settings
@@ -49,7 +49,7 @@ window s = InWindow (name s) (64,32) (0,0)
     Applies createFrame to the pixels created from applying func to cpu
     PRE: cpu is in a functional state
 -}
-renderer :: DisplaySettings -> (CPU -> [[Bool]]) -> CPU -> Picture
+renderer :: DisplaySettings -> (CPU -> [Int]) -> CPU -> Picture
 renderer s f state = createFrame s $ f state
 
 {-  handleKeys func event cpu
@@ -70,5 +70,5 @@ handleKeys _ _ game = game
                   Calls uFunc every frame
                   Calls hFunc everytime a key is pressed
 -}
-startRenderer :: DisplaySettings -> CPU -> (CPU -> [[Bool]]) -> (Char -> CPU -> CPU) -> (Float -> CPU -> CPU) -> IO()
+startRenderer :: DisplaySettings -> CPU -> (CPU -> [Int]) -> (Char -> CPU -> CPU) -> (Float -> CPU -> CPU) -> IO()
 startRenderer s gS rF hF uF = play (window s) (background s) (fps s) gS (renderer s rF) (handleKeys hF) uF 

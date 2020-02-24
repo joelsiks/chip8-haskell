@@ -20,8 +20,8 @@ main = do
     startRenderer displaySettings cpu onRender onInput onUpdate
 
 -- Called last every frame
-onRender :: CPU -> [[Bool]]
-onRender cpu = undefined
+onRender :: CPU -> [Int]
+onRender cpu = concat (vram cpu)
 
 -- Celled on input
 onInput :: Char -> CPU -> CPU

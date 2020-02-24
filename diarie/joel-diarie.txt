@@ -35,3 +35,8 @@ Har börjat med att implementera funktionen "executeOpcode" som är den del av C
 Det är många olika instruktioner som ska implementeras och det gäller att hålla tungan rätt i mun. Blir det fel här
 är det väldigt svårt att ta reda på senare. Nästa steg som återstår är att implementera färdigt "executeOpcode" samt
 implementera test fall för alla eller många av instruktionerna.
+
+24/02 12:00-13:45
+
+Nu implementerat färdigt alla instruktioner förutom två för opcodesen. De två som återstår kräver att vi inom gruppen 
+kommer överrens om en konsensus över hur vi ska behandla input gällande knapptryck.

@@ -14,9 +14,9 @@ path = "../../roms/PONG"
      SIDE EFFECTS: Reads the file at path, exception thrown if it does not exist
      EXAMPLES: readRom (FilePath with text file containing 3 characters) = [13,10,35]
   -}
-readRom :: FilePath -> [Int]
+readRom :: FilePath -> IO [Int]
 {-# NOINLINE readRom #-}
-readRom path = unsafePerformIO $ do
+readRom path = do
     file <- B.readFile path
     let binaryList = map fromIntegral (B.unpack file)
     return (checkRom binaryList)

@@ -9,9 +9,11 @@ import System.Random
 
 main :: IO ()
 main = do
-    let testPath = "../roms/PONG"
-    rom <- CPU.LoadRom.readRom testPath
+    let ghciTestPath = "../roms/PONG"
+    let cabalRunTestPath = "roms/PONG"
+    rom <- CPU.LoadRom.readRom cabalRunTestPath
     let cpu = CPU.CPU.initCPU rom (mkStdGen 0)
+    -- bätre slumpgenerering
     -- skicka vidare CPU här
 
     let displaySettings = Settings "Test" blue 60
@@ -28,5 +30,3 @@ onInput key cpu = undefined
 -- Called every frame before onRenderer
 onUpdate :: Float -> CPU -> CPU
 onUpdate time cpu = undefined
-
-

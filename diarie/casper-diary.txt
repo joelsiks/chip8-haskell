@@ -13,4 +13,4 @@
 		       Implementering av initilisationsfunktion för minnet där program och font läses in
                        Funktionspecifikation för majoriteten av de skrivna funktionerna
 
-2020-02-24 14:15-14:40 Bortagning av osäkra funktioner och primitiv initialisering av CPUn.
+2020-02-24 14:15-14:45 Bortagning av osäkra funktioner och primitiv initialisering av CPUn.

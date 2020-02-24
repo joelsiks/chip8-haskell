@@ -3,9 +3,7 @@ module CPU.CPU where
 
 import System.IO
 import CPU.LoadRom
-
-
-type Opcode = (Int, Int, Int, Int)
+import System.Random
 
 {- Represents a centralised state for the CPU of the CHIP-8.
    The CHIP-8's state is the inner workings of the computer. It holds all the necessary data
@@ -13,32 +11,36 @@ type Opcode = (Int, Int, Int, Int)
 
    INVARIANT: TODO
 -}
-data CPU = Cpu { v :: [Int]         -- V Register containing 16 8-bit registrars. Index 0, 1, 2 ... E, F.
-               , i :: Int           -- 16 bit register for memory address.
-               , sound_timer :: Int 
-               , delay_timer :: Int 
-               , pc :: Int          -- Pointer to memory for current opcode. 0 =< pc =< 4095
-               , memory :: [Int]    -- Place to store program data (instructions). 4096 bytes.
-               , stack :: [Int]     -- Stack
-               , sp :: Int          -- Pointer to current place in the stack.
-               , vram :: [[Int]]    -- Memory containing what pixels are to be drawed on the screen.
-               , keyboard :: [Bool] -- List with bools representing if a certain key has been pressed.
+data CPU = Cpu { v :: [Int]             -- V Register containing 16 8-bit registrars. Index 0, 1, 2 ... E, F.
+               , i :: Int               -- 16 bit register for memory address.
+               , sound_timer :: Int     
+               , delay_timer :: Int     
+               , pc :: Int              -- Pointer to memory for current opcode. 0 =< pc =< 4095
+               , memory :: [Int]        -- Place to store program data (instructions). 4096 bytes.
+               , stack :: [Int]         -- Stack. List of 16 16-bit values.
+               , sp :: Int              -- Pointer to current place in the stack.
+               , vram :: [[Int]]        -- Memory containing what pixels are to be drawed on the screen.
+               , keyboard :: [Bool]     -- List with bools representing if a certain key has been pressed.
+               , keypad_waiting :: Bool -- List with bools representing if a certain key has been pressed.
+               , rgen :: StdGen         -- Random number generator.
                } deriving (Show)
 
 -- Returns a fresh state of the CPU where all of its values has been
 -- set to their initial values.
-initCPU :: CPU
-initCPU = Cpu { v = replicate 16 0
-              , i = 0x200
-              , sound_timer = 0
-              , delay_timer = 0
-              , pc = 0x200
-              , memory = replicate 4096 0
-              , stack = replicate 16 0
-              , sp = 0
-              , vram = replicate 10 []
-              , keyboard = replicate 16 False
-              }
+initCPU :: StdGen -> CPU
+initCPU randomgen = Cpu { v = replicate 16 0
+                        , i = 0x200
+                        , sound_timer = 0
+                        , delay_timer = 0
+                        , pc = 0x200
+                        , memory = replicate 4096 0
+                        , stack = replicate 16 0
+                        , sp = 0
+                        , vram = replicate 32 (replicate 64 0)
+                        , keyboard = replicate 16 False
+                        , keypad_waiting = False
+                        , rgen = randomgen
+                        }
 
 {- initMemory path
      Loads the fontset and a program onto the processors memory

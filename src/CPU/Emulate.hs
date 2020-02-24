@@ -4,9 +4,19 @@ module CPU.Emulate where
 import Control.Lens
 import CPU.CPU
 import Data.Bits
+import System.Random
 
--- TODO: Lägga till test-case som kan kolla mot fontset:ens position i minnet till exempel, 
---       eftersom den alltid är samma.
+{- Represents an instruction for the CHIP-8.
+   Opcode is a two-byte value that is stored in big-endian format.
+   Each Integer in Opcode is a hexadecimal value between 0-F.
+   The two first Integers in Opcode corresponds to the first byte of the instruction, 
+   and the last two corresponds to the second byte. 
+
+   INVARIANT: Each integer in Opcode is a hexadecimal character, i.e 0-9 or A-F.
+              Opcode corresponds to a defined instruction in executeOpcode.
+-}
+type Opcode = (Int, Int, Int, Int)
+
 {- fetchOpcode cpu
    Reads an opcode from the memory of a CPU.
 
@@ -18,13 +28,13 @@ import Data.Bits
 -}
 fetchOpcode :: CPU -> Opcode
 fetchOpcode cpu = (a1, a2, b1, b2)
-                  where
-                    a1 = shift ((.&.) byte1 0xF0) (-4)
-                    a2 = (.&.) byte1 0xF
-                    b1 = shift ((.&.) byte2 0xF0) (-4)
-                    b2 = (.&.) byte2 0xF
-                    byte1 = memory cpu !! pc cpu
-                    byte2 = memory cpu !! pc cpu + 1
+  where
+    a1 = shift ((.&.) byte1 0xF0) (-4)
+    a2 = (.&.) byte1 0xF
+    b1 = shift ((.&.) byte2 0xF0) (-4)
+    b2 = (.&.) byte2 0xF
+    byte1 = memory cpu !! pc cpu
+    byte2 = memory cpu !! pc cpu + 1
 
 {- executeOpcode cpu opcode
    Executes a given opcode and alters the state of the CPU it was executed on.
@@ -40,7 +50,7 @@ executeOpcode cpu opcode =
     (0x0, 0x0, 0xE, 0x0) ->
       nextPC $ clearScreen cpu
     (0x0, 0x0, 0xE, 0xE) ->
-      nextPC $ returnFromSubroutine cpu
+      returnFromSubroutine cpu
     (0x1, _, _, _) ->
       jumpToAddress cpu $ opNNN opcode
     (0x2, _, _, _) ->
@@ -85,6 +95,41 @@ executeOpcode cpu opcode =
       nextPC $ cpu {i = opNNN opcode}
     (0xB, _, _, _) ->
       nextPC $ jumpToAddress cpu (v cpu !! 0 + opNNN opcode)
+    (0xC, x, _, _) ->
+      nextPC $ setRegister ucpu x (randomValue .&. opNN opcode)
+        where
+          (randomValue, newStdGen) = randomR (0, 255) (rgen cpu)
+          ucpu = cpu {rgen = newStdGen}
+    (0xD, x, y, n) ->
+      -- TODO
+      cpu
+    (0xE, x, 0x9, 0xE) ->
+      nextPC $ skipInstructionIf cpu (keyboard cpu !! (v cpu !! x))
+    (0xE, x, 0xA, 0x1) ->
+      nextPC $ skipInstructionIf cpu (not (keyboard cpu !! (v cpu !! x)))
+    (0xF, x, 0x0, 0x7) ->
+      nextPC $ setRegister cpu x (delay_timer cpu)
+    (0xF, x, 0x0, 0xA) ->
+      -- TODO
+      cpu
+    (0xF, x, 0x1, 0x5) ->
+      nextPC $ cpu {delay_timer = v cpu !! x}
+    (0xF, x, 0x1, 0x8) ->
+      nextPC $ cpu {sound_timer = v cpu !! x}
+    (0xF, x, 0x1, 0xE) ->
+      nextPC $ ucpu {i = i cpu + v cpu !! x}
+        where
+          ucpu = setRegister cpu 0xF (if i cpu > x then 1 else 0)
+    (0xF, x, 0x2, 0x9) ->
+      -- Sets I to the location of the sprite for the character in VX. 
+      -- Characters 0-F (in hexadecimal) are represented by a 4x5 font. 
+      nextPC $ cpu {i = v cpu !! x * 5}
+    (0xF, x, 0x3, 0x3) ->
+      nextPC $ storeBinaryRepresentation cpu x
+    (0xF, x, 0x5, 0x5) ->
+      nextPC $ storeRegisters cpu x
+    (0xF, x, 0x6, 0x5) ->
+      nextPC $ loadRegisters cpu x
 
 nextPC :: CPU -> CPU
 nextPC cpu = jumpToAddress cpu (pc cpu + 2)
@@ -99,20 +144,58 @@ skipInstructionIf :: CPU -> Bool -> CPU
 skipInstructionIf cpu pred | pred      = nextPC cpu
                            | otherwise = cpu
 
+-- Clears the screen by replacing the vram with an empty copy.
+clearScreen :: CPU -> CPU
+clearScreen cpu = cpu {vram = replicate 32 (replicate 64 0)}
+
+-- Calls a subroutine by inserting the current position into the stack and jumping to
+-- a specific address.
+callSubroutine :: CPU -> Int -> CPU
+callSubroutine cpu addr = jumpToAddress ucpu addr
+  where ucpu = insertToStack cpu (pc (nextPC cpu))
+
+-- Returns from a subroutine by decrementing the stack pointer by 1 and jumping to the stored location
+-- in (stack cpu !! sp cpu).
+returnFromSubroutine :: CPU -> CPU
+returnFromSubroutine cpu = jumpToAddress ucpu (stack ucpu !! sp ucpu)
+  where ucpu = cpu {sp = sp cpu - 1}
+
+-- Inserts a given value into the stack where the stack pointer points to,
+-- and increases the stack pointer by 1.
+insertToStack :: CPU -> Int -> CPU
+insertToStack cpu val = ucpu {sp = sp cpu + 1}
+  where ucpu = cpu {stack = (element (sp cpu) .~ val) (stack cpu)}
+
+-- Sets the register at idx to val.
 setRegister :: CPU -> Int -> Int -> CPU
-setRegister cpu x val = cpu {v = (element x .~ val) (v cpu)}
+setRegister cpu idx val = cpu {v = (element idx .~ val) (v cpu)}
+
+-- Sets the memory position at pos to val.
+setMemory :: CPU -> Int -> Int -> CPU
+setMemory cpu pos val = cpu {memory = (element pos .~ val) (memory cpu)}
+
+-- Stores the binary representation of the value located in (v cpu) at index idx to the memory.
+storeBinaryRepresentation :: CPU -> Int -> CPU
+storeBinaryRepresentation cpu vidx = setMemory ucpu2 (i cpu) (v cpu !! vidx `div` 100)
+  where
+    ucpu2 = setMemory ucpu1 (i cpu + 1) ((v cpu !! vidx `mod` 100) `div` 10)
+      where
+        ucpu1 = setMemory cpu (i cpu + 2) (v cpu !! vidx `mod` 10)
+
+-- Copies all the values from (v cpu) register to the memory starting at position (i cpu).
+storeRegisters :: CPU -> Int -> CPU
+storeRegisters cpu idx | idx == 0  = ucpu
+                       | otherwise = storeRegisters ucpu (idx - 1)
+                         where ucpu = setMemory cpu (i cpu + idx) (v cpu !! idx)
+
+-- Transfers the copied register values from memory back into (v cpu).
+loadRegisters :: CPU -> Int -> CPU
+loadRegisters cpu idx | idx == 0  = ucpu
+                      | otherwise = loadRegisters ucpu (idx - 1)
+                        where ucpu = setRegister cpu idx (memory cpu !! i cpu + idx)
 
 opNNN :: Opcode -> Int
 opNNN (_, x, y, z) = shift x 8 + shift y 4 + z
 
 opNN :: Opcode -> Int
 opNN (_, _, x, y) = shift x 4 + y
-
-clearScreen :: CPU -> CPU
-clearScreen = undefined
-
-callSubroutine :: CPU -> Int -> CPU
-callSubroutine = undefined
-
-returnFromSubroutine :: CPU -> CPU
-returnFromSubroutine = undefined

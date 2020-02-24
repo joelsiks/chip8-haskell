@@ -2,7 +2,6 @@ module CPU.LoadRom(readRom) where
 
 import System.IO
 import qualified Data.ByteString as B
-import System.IO.Unsafe (unsafePerformIO)
 
 path = "../../roms/PONG"
 
@@ -15,7 +14,6 @@ path = "../../roms/PONG"
      EXAMPLES: readRom (FilePath with text file containing 3 characters) = [13,10,35]
   -}
 readRom :: FilePath -> IO [Int]
-{-# NOINLINE readRom #-}
 readRom path = do
     file <- B.readFile path
     let binaryList = map fromIntegral (B.unpack file)

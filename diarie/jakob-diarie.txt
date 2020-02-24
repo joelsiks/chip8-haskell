@@ -12,5 +12,10 @@
 - Implemation av Gloss i Renderer.hs väntar på komentarer från de andra.
 
 23/02 16:00 - 17:30
-- Implemented the CPU class in Renderer.hs
-- Added documentation in Renderer.hs
+- Implementerade CPU classen i Renderer.hs
+- Skrev dokumentation i Renderer.hs
+
+24/02 14:30 - 17:00
+- Implementerade Renderern i main
+- Implementerade hantering av inputs till CPU:n
+- Ändrade typen av inputs onRender funktionen till startRenderer från [[Bool]] till [Int]

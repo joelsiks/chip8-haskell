@@ -10,7 +10,7 @@ import System.Random
 emulateLoop :: CPU -> IO ()
 emulateLoop cpu = do
   -- putStrLn $ "opcode: " ++ (show (fetchOpcode cpu))
-  putStrLn $ show (cpu)
+  print cpu
   let newCPU = emulateCycle cpu
   -- draw screen
   -- get keyboard state
@@ -36,7 +36,7 @@ emulateCycle cpu = decreseTimers $ executeOpcode cpu (fetchOpcode cpu)
              decreseTimers (cpu where sound_timer = 6 & delay_timer = 4) = (cpu where sound_timer = 5 & delay_timer = 3)
 -}
 decreseTimers :: CPU -> CPU
-decreseTimers cpu = cpu {sound_timer = max 0 ((sound_timer cpu) - 1), delay_timer = max 0 ((delay_timer cpu) - 1)}
+decreseTimers cpu = cpu {sound_timer = max 0 (sound_timer cpu - 1), delay_timer = max 0 (delay_timer cpu - 1)}
 
 {- Represents an instruction for the CHIP-8.
    Opcode is a two-byte value that is stored in big-endian format.
@@ -122,10 +122,7 @@ executeOpcode cpu opcode =
     (0xB, _, _, _) ->
       incPC $ jumpToAddress cpu (head (v cpu) + opNNN opcode)
     (0xC, x, _, _) ->
-      incPC $ setRegister ucpu x (randomValue .&. opNN opcode)
-        where
-          (randomValue, newStdGen) = randomR (0, 255) (rgen cpu)
-          ucpu = cpu {rgen = newStdGen}
+      incPC $ generateRandomValue cpu x (opNN opcode)
     (0xD, x, y, n) ->
       incPC $ drawSprite cpu x y n
     (0xE, x, 0x9, 0xE) ->
@@ -215,6 +212,14 @@ loadRegisters :: CPU -> Int -> CPU
 loadRegisters cpu idx | idx == 0  = ucpu
                       | otherwise = loadRegisters ucpu (idx - 1)
                         where ucpu = setRegister cpu idx (memory cpu !! (i cpu + idx))
+
+-- Generates a random value and stores it in (v cpu) at idx.
+generateRandomValue :: CPU -> Int -> Int -> CPU
+generateRandomValue cpu idx andVal = 
+  let
+    (randomValue, newStdGen) = randomR (0, 255) (rgen cpu)
+    ucpu = cpu {rgen = newStdGen}
+  in setRegister ucpu idx (randomValue .&. andVal)
 
 drawSprite :: CPU -> Int -> Int -> Int -> CPU
 drawSprite cpu x y times = drawSprite' (Util.nestedListIndexes times 8) cpu x y

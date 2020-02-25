@@ -35,4 +35,6 @@ Utforsking bakom emulationscyklen av Chip8 och vad som behöver göras när.
 Implementation av emulationscykel samt en primitiv loop som kör cykeln men saknar grafik och tangentbordtryckningar.
 Funktionspecifikation för funktioner.
 
-2020-02-25 14:30-
+2020-02-25 14:30-15:40
+
+Implementation av testfall för initilisationsfunktionerna + rominlänsingsfunktionerna.

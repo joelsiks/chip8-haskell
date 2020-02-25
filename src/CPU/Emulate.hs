@@ -7,6 +7,37 @@ import qualified CPU.Utility as Util
 import Data.Bits
 import System.Random
 
+emulateLoop :: CPU -> IO ()
+emulateLoop cpu = do
+  -- putStrLn $ "opcode: " ++ (show (fetchOpcode cpu))
+  putStrLn $ show (cpu)
+  let newCPU = emulateCycle cpu
+  -- draw screen
+  -- get keyboard state
+  -- FX0A wait here?
+  -- delay to set cpu speed?
+  emulateLoop newCPU
+
+{- emulateCycle cpu
+   Emulates 1 cycle of the CPU
+
+   RETURNS: a new cpu where the opcode has been fetched and executed, and sound_timer and delay_timer have been decreesed by 1
+   EXAMPLES: emulateCycle (cpu where opcode is to store val at idx) = (cpu where val is stored at idx)
+             TODO?
+-}
+emulateCycle :: CPU -> CPU
+emulateCycle cpu = decreseTimers $ executeOpcode cpu (fetchOpcode cpu)
+
+{- decreseTimer cpu
+   Decreses the delay timer and sound timer of the cpu by 1
+
+   RETURNS: a new cpu where sound_timer and/or delay_timer are decreesed by 1 if either count is above 0
+   EXAMPLES: decreseTimers (cpu where sound_timer = 6 & delay_timer = 4) = (cpu where sound_timer = 5 & delay_timer = 3)
+             decreseTimers (cpu where sound_timer = 6 & delay_timer = 4) = (cpu where sound_timer = 5 & delay_timer = 3)
+-}
+decreseTimers :: CPU -> CPU
+decreseTimers cpu = cpu {sound_timer = max 0 ((sound_timer cpu) - 1), delay_timer = max 0 ((delay_timer cpu) - 1)}
+
 {- Represents an instruction for the CHIP-8.
    Opcode is a two-byte value that is stored in big-endian format.
    Each Integer in Opcode is a hexadecimal value between 0-F.

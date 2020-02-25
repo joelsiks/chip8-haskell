@@ -2,6 +2,7 @@ module Main where
 
 import CPU.CPU
 import CPU.LoadRom
+import CPU.Emulate
 import qualified CPU.Utility as Util
 import Render.Renderer
 import Graphics.Gloss(blue)
@@ -11,10 +12,10 @@ main :: IO ()
 main = do
   let ghciTestPath = "../roms/PONG"
   let cabalRunTestPath = "roms/PONG"
-  rom <- CPU.LoadRom.readRom cabalRunTestPath
+  rom <- CPU.LoadRom.readRom ghciTestPath
   let cpu = CPU.CPU.initCPU rom (mkStdGen 0)
-  -- bätre slumpgenerering
-  -- skicka vidare CPU här
+    -- bätre slumpgenerering
+  CPU.Emulate.emulateLoop cpu
   putStrLn "Hello, World!"
   
   --let displaySettings = Settings "Test" blue 60

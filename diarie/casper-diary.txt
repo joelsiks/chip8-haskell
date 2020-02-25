@@ -1,16 +1,36 @@
-2020-02-20 Efter disskussion med gruppen där vi uteslöt och vägde olika idéer kom vi fram till att göra en Chip-8 emulator.
+2020-02-20
 
-2020-02-21 12:00-13:15 Planering i gruppen där vi strukturerade upp projektet i delar, delade ut arbetet och skapade trello/github repo.
+Efter disskussion med gruppen där vi uteslöt och vägde olika idéer kom vi fram till att göra en Chip-8 emulator.
 
-2020-02-21 13:15-13:30 Möte med coach sanna där vi diskuterade projektet.
+2020-02-21 12:00-13:15
 
-2020-02-21 13:30-14:00 Fortsatt planering där LaTeX dokument sattes upp och de första uppgifterna distribuerades. Mitt första mål är att läsa in ROM-filer och lagra i programmets minne.
+Planering i gruppen där vi strukturerade upp projektet i delar, delade ut arbetet och skapade trello/github repo/LaTeX dokument.
 
-2020-02-21 15:00-17:00 Utforskning till hur man kan läsa en fil byte för byte och konvertera den till tal.
+2020-02-21 13:15-13:30
 
-2020-02-23 14:30-17:30 Utforsking kring hur IO [Int] skulle påverka programmet istället för [Int] och hur säkert det är att gå från IO [Int] -> [Int]
-		       Implementering av förbättrad inlänsingsfunktion där [Int] returneras istället för IO [Int] och checks så att funktionen säkert kan returnera [Int]
-		       Implementering av initilisationsfunktion för minnet där program och font läses in
-                       Funktionspecifikation för majoriteten av de skrivna funktionerna
+Möte med coach sanna där vi diskuterade projektet.
 
-2020-02-24 14:15-14:45 Bortagning av osäkra funktioner och primitiv initialisering av CPUn.
+2020-02-21 13:30-14:00
+
+Fortsatt planering där LaTeX dokument sattes upp och de första uppgifterna distribuerades. Mitt första mål är att läsa in ROM-filer och lagra i programmets minne.
+
+2020-02-21 15:00-17:00
+
+Utforskning till hur man kan läsa en fil byte för byte och konvertera den till tal.
+
+2020-02-23 14:30-17:30
+
+Utforsking kring hur IO [Int] skulle påverka programmet istället för [Int] och hur säkert det är att gå från IO [Int] -> [Int]
+Implementering av förbättrad inlänsingsfunktion där [Int] returneras istället för IO [Int] och checks så att funktionen säkert kan returnera [Int]
+Implementering av initilisationsfunktion för minnet där program och font läses in
+Funktionspecifikation för majoriteten av de skrivna funktionerna
+
+2020-02-24 14:15-14:45
+
+Bortagning av osäkra funktioner och primitiv initialisering av CPUn.
+
+2020-02-25 11:00-13:00 
+
+Utforsking bakom emulationscyklen av Chip8 och vad som behöver göras när.
+Implementation av emulationscykel samt en primitiv loop som kör cykeln men saknar grafik och tangentbordtryckningar.
+Funktionspecifikation för funktioner.

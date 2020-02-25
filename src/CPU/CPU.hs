@@ -13,6 +13,8 @@ windowWidth  = 64
    that it needs to have in order to execute any instructions and to interpret any data.
 
    INVARIANT: TODO
+              sound_timer >= 0
+              delay_timer >= 0
 -}
 data CPU = Cpu { v :: [Int]             -- 16 V Registers with 8-bit registrars. Index 0, 1, 2 ... E, F.
                , i :: Int               -- 16 bit register for memory address.

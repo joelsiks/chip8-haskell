@@ -12,7 +12,8 @@ windowWidth  = 64
    The CHIP-8's state is the inner workings of the computer. It holds all the necessary data
    that it needs to have in order to execute any instructions and to interpret any data.
 
-   INVARIANT: TODO
+   INVARIANT: 0 <= pc <= 4095
+              0 <= sp <= 15
               sound_timer >= 0
               delay_timer >= 0
 -}
@@ -20,7 +21,7 @@ data CPU = Cpu { v :: [Int]             -- 16 V Registers with 8-bit registrars.
                , i :: Int               -- 16 bit register for memory address.
                , sound_timer :: Int     
                , delay_timer :: Int     
-               , pc :: Int              -- Pointer to memory for current opcode. 0 =< pc < length memory.
+               , pc :: Int              -- Pointer to memory for current opcode.
                , memory :: [Int]        -- Place to store program data (instructions). 4096 bytes.
                , stack :: [Int]         -- Stack. List of 16 16-bit values.
                , sp :: Int              -- Pointer to current place in the stack.
@@ -57,7 +58,7 @@ defaultVRAM = replicate windowHeight (replicate windowWidth 0)
      EXAMPLES: initMemory ('rom' containing 3 characters) = fontset ++ (zeros to index 512) ++ [13,10,35] ++ (zeros to index 4096)
   -}
 initMemory :: [Int] -> [Int]
-initMemory rom = fontset ++ (replicate (0x200 - length fontset) 0) ++ padRom rom
+initMemory rom = fontset ++ replicate (0x200 - length fontset) 0 ++ padRom rom
 
 {- padRom rom
      Pads rom with empty data to fill up memory
@@ -68,8 +69,8 @@ initMemory rom = fontset ++ (replicate (0x200 - length fontset) 0) ++ padRom rom
 padRom :: [Int] -> [Int]
 padRom rom
   | memLeft < 0 = error "Program too large"
-  | rom == [] = error "File error"
-  | otherwise = rom ++ (replicate memLeft 0)
+  | null rom = error "File error"
+  | otherwise = rom ++ replicate memLeft 0
       where memLeft = 0xE00 - length rom
 
 -- Fontset for drawing characters to the screen.

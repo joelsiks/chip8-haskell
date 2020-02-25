@@ -47,7 +47,7 @@ fetchOpcode :: CPU -> Opcode
 fetchOpcode cpu = (a1, a2, b1, b2)
   where
     (a1, a2) = Util.splitByte $ memory cpu !! pc cpu
-    (b1, b2) = Util.splitByte $ memory cpu !! pc cpu + 1
+    (b1, b2) = Util.splitByte $ memory cpu !! (pc cpu + 1)
 
 {- executeOpcode cpu opcode
    Executes a given opcode and alters the state of the CPU it was executed on.
@@ -142,12 +142,15 @@ executeOpcode cpu opcode =
     -- throwing an error.
     _ -> cpu
 
+-- Increments the program counter of a CPU by 2 (one instruction).
 incPC :: CPU -> CPU
 incPC cpu = jumpToAddress cpu (pc cpu + 2)
 
+-- Jumps to a specific address by setting the program counter to that address.
 jumpToAddress :: CPU -> Int -> CPU
 jumpToAddress cpu addr = cpu {pc = addr}
 
+-- Skips instruction if pred is True, otherwise return the same state.
 skipInstructionIf :: CPU -> Bool -> CPU
 skipInstructionIf cpu pred | pred      = incPC cpu
                            | otherwise = cpu

@@ -1,4 +1,4 @@
-module CPU.LoadRom(readRom) where 
+module CPU.LoadRom where 
 
 import System.IO
 import qualified Data.ByteString as B

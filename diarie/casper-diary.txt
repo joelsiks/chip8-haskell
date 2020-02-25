@@ -34,3 +34,5 @@ Bortagning av osäkra funktioner och primitiv initialisering av CPUn.
 Utforsking bakom emulationscyklen av Chip8 och vad som behöver göras när.
 Implementation av emulationscykel samt en primitiv loop som kör cykeln men saknar grafik och tangentbordtryckningar.
 Funktionspecifikation för funktioner.
+
+2020-02-25 14:30-

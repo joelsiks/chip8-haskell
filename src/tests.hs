@@ -10,6 +10,13 @@ blankCPU = initCPU [0] (mkStdGen 0)
 
 -- CPU Tests
 
+testPR = TestCase $ assertEqual "padRom" 4096 (length (CPU.padRom [1]))
+
+-- Rom Tests
+
+testCR1 = TestCase $ assertEqual "checkRom" [1,2,3] (LoadRom.checkRom [1,2,3])
+testCR2 = TestCase $ assertEqual "checkRom" 0 (length (LoadRom.checkRom (replicate 0 4097)))
+
 -- Utility tests
 
 testSB1 = TestCase $ assertEqual "splitByte 0xAF" (0xA, 0xF) (Util.splitByte 0xAF)

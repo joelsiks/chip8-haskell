@@ -4,9 +4,11 @@ import CPU.CPU as CPU
 import CPU.Emulate as Emulate
 import CPU.Utility as Util
 import CPU.LoadRom as LoadRom
-import System.Random (mkStdGen)
+import Data.Bits ((.&.))
+import System.Random (mkStdGen, randomR)
 
-blankCPU = initCPU [0] (mkStdGen 0)
+standardGen = mkStdGen 0
+blankCPU = initCPU [0] standardGen
 
 -------------------------------- 
 -- CPU Tests
@@ -14,30 +16,30 @@ blankCPU = initCPU [0] (mkStdGen 0)
 --initCPU
 -- Timers should always be >= 0
 testICPU1 =
-    let cpu = CPU.initCPU [1,2,3] (mkStdGen 0)
-    in
-        TestCase $ assertBool "initCPU [1,2,3] (mkStdGen 0)" (sound_timer cpu >= 0 && delay_timer cpu >= 0)
+  let cpu = CPU.initCPU [1,2,3] (mkStdGen 0)
+  in
+    TestCase $ assertBool "initCPU [1,2,3] (mkStdGen 0)" (sound_timer cpu >= 0 && delay_timer cpu >= 0)
 
 -- Memory size is constant
 testICPU2 =
-    let cpu = CPU.initCPU [1,2,3] (mkStdGen 0)
-    in
-        TestCase $ assertEqual "initCPU [1,2,3] (mkStdGen 0)" 4096 (length (memory cpu))
+  let cpu = CPU.initCPU [1,2,3] (mkStdGen 0)
+  in
+    TestCase $ assertEqual "initCPU [1,2,3] (mkStdGen 0)" 4096 (length (memory cpu))
 
 -- Vram should be blank and a constant size of 64*32
 testICPU3 =
-    let cpu = CPU.initCPU [1,2,3] (mkStdGen 0)
-    in
-        TestCase $ assertEqual "initCPU [1,2,3] (mkStdGen 0)" (replicate (64*32) 0) (concat (vram cpu))
+  let cpu = CPU.initCPU [1,2,3] (mkStdGen 0)
+  in
+    TestCase $ assertEqual "initCPU [1,2,3] (mkStdGen 0)" (replicate (64*32) 0) (concat (vram cpu))
 
 
 -- initMemory
 -- Check that memory is the correct size
 testIM1 = TestCase $ assertEqual "initMemory [1,2,3]" 4096 (length (CPU.initMemory [1,2,3]))
 -- Check that fontset loaded correctly
-testIM2 = TestCase $ assertEqual "initMemory [1]" 0x90 ((CPU.initMemory [1]) !! 2)
+testIM2 = TestCase $ assertEqual "initMemory [1]" 0x90 (CPU.initMemory [1] !! 2)
 -- Check that program loaded at correct index
-testIM3 = TestCase $ assertEqual "initMemory [0xA,0xB,0xC]" 0xB ((CPU.initMemory [0xA,0xB,0xC]) !! 513)
+testIM3 = TestCase $ assertEqual "initMemory [0xA,0xB,0xC]" 0xB (CPU.initMemory [0xA,0xB,0xC] !! 513)
 
 -- padRom
 -- Program with padding should be constant size 
@@ -82,16 +84,16 @@ utilityTests = TestList [testSB1, testSB2, testSB3, testREP1, testNLI1]
 
 -- fetchOpcode
 -- Fetching a "fake" opcode from the start of the memory where the fontset is located should always yield the same result.
-testFOp1 = TestCase $ assertEqual "fetchOpcode" 
-               (0xF, 0x0, 0x9, 0x0) (Emulate.fetchOpcode (blankCPU {pc = 0}))
+testFOp1 = TestCase $ assertEqual "fetchOpcode" (0xF, 0x0, 0x9, 0x0) 
+               (Emulate.fetchOpcode (blankCPU {pc = 0}))
 
 -- opNNN
-testOPNNN = TestCase $ assertEqual "opNNN (0xA, 0xB, 0xC, 0xD)"
+testOPNNN = TestCase $ assertEqual "opNNN (0xA, 0xB, 0xC, 0xD)" 
                 0xBCD (Emulate.opNNN (0xA, 0xB, 0xC, 0xD))
 
 -- opNN
-testOPNN = TestCase $ assertEqual "opNN (0x1, 0x2, 0x3, 0x4)"
-                0x34 (Emulate.opNN (0x1, 0x2, 0x3, 0x4))
+testOPNN = TestCase $ assertEqual "opNN (0x1, 0x2, 0x3, 0x4)" 
+               0x34 (Emulate.opNN (0x1, 0x2, 0x3, 0x4))
 
 -- incPC
 -- When increasing the program counter it should always be greater than it was before. Exact implementation may vary.
@@ -99,7 +101,7 @@ testIncPC = TestCase $ assertBool "incPC"
                 (pc (Emulate.incPC blankCPU) > pc blankCPU)
 
 -- jumpToAddress - OPCODE: 0x1NNN
-testJump = TestCase $ assertEqual "jumpToAddress" 
+testJump = TestCase $ assertEqual "jumpToAddress 0x100" 
                0x100 (pc (Emulate.jumpToAddress blankCPU 0x100))
 
 -- insertToStack
@@ -108,17 +110,18 @@ testInsertStack =
       value = 0xFF
       ucpu = Emulate.insertToStack blankCPU value
     in
-      TestCase $ assertEqual "insertToStack" 
+      TestCase $ assertEqual ("insertToStack blankCPU " ++ show value)
         value (stack ucpu !! (sp ucpu - 1))
 
 -- returnFromSubroutine
+-- When returning from a subroutine the program counter should be the same as it was but incremented by one instruction.
 testRetSub =
-    let
-      callAddr = 0x200
-      ucpu = Emulate.returnFromSubroutine (Emulate.callSubroutine blankCPU callAddr)
-    in
-      TestCase $ assertEqual ("returnFromSubroutine (cpu that has been called to " ++ show callAddr ++ ")")
-        (pc (incPC blankCPU)) (pc ucpu)
+  let
+    callAddr = 0x200
+    ucpu = Emulate.returnFromSubroutine (Emulate.callSubroutine blankCPU callAddr)
+  in
+    TestCase $ assertEqual ("returnFromSubroutine (cpu that has been called to " ++ show callAddr ++ ")")
+      (pc (incPC blankCPU)) (pc ucpu)
 
 -- skipInstructionIf
 testSkipIf1 = TestCase $ assertEqual "skipInstructionIf blankCPU False"
@@ -128,26 +131,29 @@ testSkipIf2 = TestCase $ assertEqual "skipInstructionIf blankCPU True"
                   (pc (Emulate.incPC blankCPU)) (pc (skipInstructionIf blankCPU True))
 
 -- setRegister
+-- Checks if the correct value has been inserted at the correct index.
 testSetReg =
-    let
-      index = 0xA
-      value = 0xFF
-      ucpu = setRegister blankCPU index value
-    in
-      TestCase $ assertEqual ("setRegister blankCPU "  ++ show index ++ " " ++ show value)
-        value (v ucpu !! index)
+  let
+    index = 0xA
+    value = 0xFF
+    ucpu = setRegister blankCPU index value
+  in
+    TestCase $ assertEqual ("setRegister blankCPU "  ++ show index ++ " " ++ show value)
+      value (v ucpu !! index)
 
 -- setMemory
+-- Checks if the correct value has been inserted at the correct index.
 testSetMem =
-    let
-      index = 0xA
-      value = 0xFF
-      ucpu = setMemory blankCPU index value
-    in
-      TestCase $ assertEqual ("setMemory blankCPU "  ++ show index ++ " " ++ show value)
-        value (memory ucpu !! index)
+  let
+    index = 0xA
+    value = 0xFF
+    ucpu = setMemory blankCPU index value
+  in
+    TestCase $ assertEqual ("setMemory blankCPU "  ++ show index ++ " " ++ show value)
+      value (memory ucpu !! index)
 
 -- storeBCDRepresentation
+-- When constructing the value from the memory it should be the same as it was when passed.
 testStoreBCD =
   let 
     index = 0x0
@@ -159,6 +165,7 @@ testStoreBCD =
       value ((memory ucpu2 !! i ucpu2) * 100 + (memory ucpu2 !! (i ucpu2 + 1)) * 10 + memory ucpu2 !! (i ucpu2 + 2))
 
 -- storeRegisters
+-- The correct amount of registers should be copied to the memory and with correct values.
 testStoreReg = 
   let
     amount = 0xF
@@ -169,6 +176,7 @@ testStoreReg =
       (v ucpu1) (take (amount+1) (memory ucpu2))
 
 -- loadRegisters
+-- The correct amount of registers should be copied from the memory and with correct values.
 testLoadReg = 
   let
     amount = 0xA
@@ -177,11 +185,25 @@ testLoadReg =
   in
     TestCase $ assertEqual ("loadRegisters (blankCPU where i=0 & v = [0..15]) " ++ show amount)
       (take amount CPU.fontset) (take amount (v ucpu2))
+
+-- generateRandomValue
+-- blankCPU uses the same standardGen as in this test so they should yield the same result when generating
+-- a random number.
+testRandVal =
+  let
+    (randVal, _) = randomR (0, 255) standardGen
+    andVal  = 0x3A
+    index = 0x0
+    ucpu = Emulate.generateRandomValue blankCPU index andVal
+  in
+    TestCase $ assertEqual ("generateRandomValue blankCPU " ++ show index ++ " " ++ show andVal)
+      (v ucpu !! index) (randVal .&. andVal)
+
         
 
 emulateTests = TestList [ testOPNNN, testOPNN, testFOp1, testIncPC, testJump, testInsertStack, testRetSub
                         , testSkipIf1, testSkipIf2, testSetReg, testSetMem, testStoreBCD, testStoreReg
-                        , testLoadReg
+                        , testLoadReg, testRandVal
                         ]
 
 -------------------------------- 

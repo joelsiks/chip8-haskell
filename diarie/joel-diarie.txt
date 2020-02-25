@@ -1,7 +1,7 @@
 
 20/02
 
-Idag har vi inom gruppen bestämt att vi ska göra en CHIP-8 Emulato :)
+Idag har vi inom gruppen bestämt att vi ska göra en CHIP-8 Emulator :)
 
 
 21/02 12:00-13:15
@@ -53,4 +53,13 @@ Delat upp funktionalitet i Emulate.hs i separata funktioner för att enklare kun
 och eventuellt debugga.
 Skapat filen Utility.hs för "hjälp" funktioner och dylikt.
 Testfall implementerade för funktioner i Utility.hs.
+
+25/02 12:30-16:45
+
+Implementerat testfall för majoriteten av funktionerna i Emulate.hs i filen tests.hs
+Fixat buggar i opcodes där det upptäckts p.g.a testfallen.
+Det blir tydligt att testfall är användbara när man jobbar i projekt som detta. Jag har hittat
+fel som hade tagit oss en bra stund att debugga annars.
+Mycket refactoring av kod.
+Implemeneterat generateRandomValue för opcode 0xCXNN.
 

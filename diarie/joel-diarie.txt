@@ -46,3 +46,11 @@ kommer överrens om en konsensus över hur vi ska behandla input gällande knapp
 Har implementerat den hittils största opcoden 0xDXYN som hanterar funktionaliteten kring att rita ut saker på skärmen.
 Det var väldigt trixit att ersätta ett enskilt element i en två dimensionell lista men nu verkar det fungera. Måste ta
 mig tiden att skapa testfall för den här bjässen sen också.
+
+25/02 9:30-10:45
+
+Delat upp funktionalitet i Emulate.hs i separata funktioner för att enklare kunna läsa koden
+och eventuellt debugga.
+Skapat filen Utility.hs för "hjälp" funktioner och dylikt.
+Testfall implementerade för funktioner i Utility.hs.
+

@@ -3,13 +3,14 @@ module CPU.Emulate where
 
 import Control.Lens
 import CPU.CPU
+import qualified CPU.Utility as Util
 import Data.Bits
 import System.Random
 
 {- Represents an instruction for the CHIP-8.
    Opcode is a two-byte value that is stored in big-endian format.
    Each Integer in Opcode is a hexadecimal value between 0-F.
-   The two first Integers in Opcode corresponds to the first byte of the instruction, 
+   The two first Ints in Opcode corresponds to the first byte of the instruction, 
    and the last two corresponds to the second byte. 
 
    INVARIANT: Each integer in Opcode is a hexadecimal character, i.e 0-9 or A-F.
@@ -29,18 +30,12 @@ type Opcode = (Int, Int, Int, Int)
 fetchOpcode :: CPU -> Opcode
 fetchOpcode cpu = (a1, a2, b1, b2)
   where
-    a1 = shift ((.&.) byte1 0xF0) (-4)
-    a2 = (.&.) byte1 0xF
-    b1 = shift ((.&.) byte2 0xF0) (-4)
-    b2 = (.&.) byte2 0xF
-    byte1 = memory cpu !! pc cpu
-    byte2 = memory cpu !! pc cpu + 1
+    (a1, a2) = Util.splitByte $ memory cpu !! pc cpu
+    (b1, b2) = Util.splitByte $ memory cpu !! pc cpu + 1
 
 {- executeOpcode cpu opcode
    Executes a given opcode and alters the state of the CPU it was executed on.
    
-   PRE: opcode is a valid opcode and matches any of the cases defined in
-        the function.
    RETURNS: cpu where opcode has been executed and altered the state of cpu in some way.
    EXAMPLES: TODO
 -}
@@ -48,7 +43,7 @@ executeOpcode :: CPU -> Opcode -> CPU
 executeOpcode cpu opcode =
   case opcode of 
     (0x0, 0x0, 0xE, 0x0) ->
-      nextPC $ clearScreen cpu
+      incPC $ cpu {vram = defaultVRAM}
     (0x0, 0x0, 0xE, 0xE) ->
       returnFromSubroutine cpu
     (0x1, _, _, _) ->
@@ -56,102 +51,96 @@ executeOpcode cpu opcode =
     (0x2, _, _, _) ->
       callSubroutine cpu $ opNNN opcode
     (0x3, x, _, _) ->
-      nextPC $ skipInstructionIf cpu (v cpu !! x == opNN opcode)
+      incPC $ skipInstructionIf cpu (v cpu !! x == opNN opcode)
     (0x4, x, _, _) ->
-      nextPC $ skipInstructionIf cpu (v cpu !! x /= opNN opcode)
+      incPC $ skipInstructionIf cpu (v cpu !! x /= opNN opcode)
     (0x5, x, y, 0x0) ->
-      nextPC $ skipInstructionIf cpu (v cpu !! x == v cpu !! y)
+      incPC $ skipInstructionIf cpu (v cpu !! x == v cpu !! y)
     (0x6, x, _, _) ->
-      nextPC $ setRegister cpu x (opNN opcode)
+      incPC $ setRegister cpu x (opNN opcode)
     (0x7, x, _, _) ->
-      nextPC $ setRegister cpu x (v cpu !! x + opNN opcode)
+      incPC $ setRegister cpu x (v cpu !! x + opNN opcode)
     (0x8, x, y, 0x0) ->
-      nextPC $ setRegister cpu x (v cpu !! y)
+      incPC $ setRegister cpu x (v cpu !! y)
     (0x8, x, y, 0x1) ->
-      nextPC $ setRegister cpu x (v cpu !! x .|. v cpu !! y)
+      incPC $ setRegister cpu x (v cpu !! x .|. v cpu !! y)
     (0x8, x, y, 0x2) ->
-      nextPC $ setRegister cpu x (v cpu !! x .&. v cpu !! y)
+      incPC $ setRegister cpu x (v cpu !! x .&. v cpu !! y)
     (0x8, x, y, 0x3) ->
-      nextPC $ setRegister cpu x (xor (v cpu !! x) (v cpu !! y))
+      incPC $ setRegister cpu x (xor (v cpu !! x) (v cpu !! y))
     (0x8, x, y, 0x4) ->
-      nextPC $ setRegister cpu x (v cpu !! x + v cpu !! y)
+      incPC $ setRegister cpu x (v cpu !! x + v cpu !! y)
     (0x8, x, y, 0x5) ->
-      nextPC $ setRegister cpu x (v cpu !! x - v cpu !! y)
+      incPC $ setRegister cpu x (v cpu !! x - v cpu !! y)
     (0x8, x, y, 0x6) ->
-      nextPC $ setRegister ucpu x (shiftR (v cpu !! x) 1)
+      incPC $ setRegister ucpu x (shiftR (v cpu !! x) 1)
         where
           ucpu = setRegister cpu 0xF (v cpu !! x .&. 0x1)
     (0x8, x, y, 0x7) ->
-      nextPC $ setRegister ucpu x (v cpu !! y - v cpu !! x)
+      incPC $ setRegister ucpu x (v cpu !! y - v cpu !! x)
         where
           ucpu = setRegister cpu 0xF (if v cpu !! y > v cpu !! x then 1 else 0)
     (0x8, x, y, 0xE) ->
-      nextPC $ setRegister ucpu x (shiftL (v cpu !! x) 1)
+      incPC $ setRegister ucpu x (shiftL (v cpu !! x) 1)
         where
           ucpu = setRegister cpu 0xF (shiftR (v cpu !! x) 7)
     (0x9, x, y, 0x0) ->
-      nextPC $ skipInstructionIf cpu (v cpu !! x /= v cpu !! y)
+      incPC $ skipInstructionIf cpu (v cpu !! x /= v cpu !! y)
     (0xA, _, _, _) ->
-      nextPC $ cpu {i = opNNN opcode}
+      incPC $ cpu {i = opNNN opcode}
     (0xB, _, _, _) ->
-      nextPC $ jumpToAddress cpu (head (v cpu) + opNNN opcode)
+      incPC $ jumpToAddress cpu (head (v cpu) + opNNN opcode)
     (0xC, x, _, _) ->
-      nextPC $ setRegister ucpu x (randomValue .&. opNN opcode)
+      incPC $ setRegister ucpu x (randomValue .&. opNN opcode)
         where
           (randomValue, newStdGen) = randomR (0, 255) (rgen cpu)
           ucpu = cpu {rgen = newStdGen}
     (0xD, x, y, n) ->
-      nextPC $ drawSprite cpu x y n
+      incPC $ drawSprite cpu x y n
     (0xE, x, 0x9, 0xE) ->
-      nextPC $ skipInstructionIf cpu (keyboard cpu !! (v cpu !! x))
+      incPC $ skipInstructionIf cpu (keyboard cpu !! (v cpu !! x))
     (0xE, x, 0xA, 0x1) ->
-      nextPC $ skipInstructionIf cpu (not (keyboard cpu !! (v cpu !! x)))
+      incPC $ skipInstructionIf cpu (not (keyboard cpu !! (v cpu !! x)))
     (0xF, x, 0x0, 0x7) ->
-      nextPC $ setRegister cpu x (delay_timer cpu)
+      incPC $ setRegister cpu x (delay_timer cpu)
     (0xF, x, 0x0, 0xA) ->
       -- TODO
       cpu
     (0xF, x, 0x1, 0x5) ->
-      nextPC $ cpu {delay_timer = v cpu !! x}
+      incPC $ cpu {delay_timer = v cpu !! x}
     (0xF, x, 0x1, 0x8) ->
-      nextPC $ cpu {sound_timer = v cpu !! x}
+      incPC $ cpu {sound_timer = v cpu !! x}
     (0xF, x, 0x1, 0xE) ->
-      nextPC $ ucpu {i = i cpu + v cpu !! x}
+      incPC $ ucpu {i = i cpu + v cpu !! x}
         where
           ucpu = setRegister cpu 0xF (if i cpu > x then 1 else 0)
     (0xF, x, 0x2, 0x9) ->
-      -- Sets I to the location of the sprite for the character in VX. 
-      -- Characters 0-F (in hexadecimal) are represented by a 4x5 font. 
-      nextPC $ cpu {i = v cpu !! x * 5}
+      incPC $ cpu {i = v cpu !! x * 5}
     (0xF, x, 0x3, 0x3) ->
-      nextPC $ storeBinaryRepresentation cpu x
+      incPC $ storeBCDRepresentation cpu x
     (0xF, x, 0x5, 0x5) ->
-      nextPC $ storeRegisters cpu x
+      incPC $ storeRegisters cpu x
     (0xF, x, 0x6, 0x5) ->
-      nextPC $ loadRegisters cpu x
+      incPC $ loadRegisters cpu x
+    -- If the instruction is not defined we just return the unchanged cpu instead of
+    -- throwing an error.
+    _ -> cpu
 
-nextPC :: CPU -> CPU
-nextPC cpu = jumpToAddress cpu (pc cpu + 2)
-
-skipPC :: CPU -> CPU
-skipPC cpu = jumpToAddress cpu (pc cpu + 4)
+incPC :: CPU -> CPU
+incPC cpu = jumpToAddress cpu (pc cpu + 2)
 
 jumpToAddress :: CPU -> Int -> CPU
 jumpToAddress cpu addr = cpu {pc = addr}
 
 skipInstructionIf :: CPU -> Bool -> CPU
-skipInstructionIf cpu pred | pred      = nextPC cpu
+skipInstructionIf cpu pred | pred      = incPC cpu
                            | otherwise = cpu
-
--- Clears the screen by replacing the vram with an empty copy.
-clearScreen :: CPU -> CPU
-clearScreen cpu = cpu {vram = defaultVRAM}
 
 -- Calls a subroutine by inserting the current position into the stack and jumping to
 -- a specific address.
 callSubroutine :: CPU -> Int -> CPU
 callSubroutine cpu addr = jumpToAddress ucpu addr
-  where ucpu = insertToStack cpu (pc (nextPC cpu))
+  where ucpu = insertToStack cpu (pc (incPC cpu))
 
 -- Returns from a subroutine by decrementing the stack pointer by 1 and jumping to the stored location
 -- in (stack cpu !! sp cpu).
@@ -163,19 +152,19 @@ returnFromSubroutine cpu = jumpToAddress ucpu (stack ucpu !! sp ucpu)
 -- and increases the stack pointer by 1.
 insertToStack :: CPU -> Int -> CPU
 insertToStack cpu val = ucpu {sp = sp cpu + 1}
-  where ucpu = cpu {stack = replace (sp cpu) val (stack cpu)}
+  where ucpu = cpu {stack = Util.replace (sp cpu) val (stack cpu)}
 
 -- Sets the register at idx to val.
 setRegister :: CPU -> Int -> Int -> CPU
-setRegister cpu idx val = cpu {v = replace idx val (v cpu)}
+setRegister cpu idx val = cpu {v = Util.replace idx val (v cpu)}
 
 -- Sets the memory position at pos to val.
 setMemory :: CPU -> Int -> Int -> CPU
-setMemory cpu pos val = cpu {memory = replace pos val (memory cpu)}
+setMemory cpu pos val = cpu {memory = Util.replace pos val (memory cpu)}
 
 -- Stores the binary representation of the value located in (v cpu) at index idx to the memory.
-storeBinaryRepresentation :: CPU -> Int -> CPU
-storeBinaryRepresentation cpu vidx = setMemory ucpu2 (i cpu) (v cpu !! vidx `div` 100)
+storeBCDRepresentation :: CPU -> Int -> CPU
+storeBCDRepresentation cpu vidx = setMemory ucpu2 (i cpu) (v cpu !! vidx `div` 100)
   where
     ucpu2 = setMemory ucpu1 (i cpu + 1) ((v cpu !! vidx `mod` 100) `div` 10)
       where
@@ -193,29 +182,8 @@ loadRegisters cpu idx | idx == 0  = ucpu
                       | otherwise = loadRegisters ucpu (idx - 1)
                         where ucpu = setRegister cpu idx (memory cpu !! i cpu + idx)
 
-{- replace idx val list
-   Replaces a value at a given index in a list with another value.
-
-   PRE: 0 <= idx <= length list
-   RETURNS: list where the value at index idx has been replaced with val.
-   EXAMPLES: replace 0 3 [1,2,3] = [3,2,3]
-             replace 1 3 [1,1,1] = [1,3,1]
--}
-replace :: Int -> a -> [a] -> [a]
-replace idx val = element idx .~ val
-
-{- nestedListIndexes rows cols
-   Calculates all possible indexes from a pair of rows and cols.
-
-   RETURNS: [(x,y) | x <- [0..cols], y <- [0..rows]]
-   EXAMPLES: nestedListIndexes 1 1 = [(0,0),(0,1),(1,0),(1,1)]
-             nestedListIndexes 1 2 = [(0,0),(0,1),(1,0),(1,1),(2,0),(2,1)]
--}
-nestedListIndexes :: Int -> Int -> [(Int, Int)]
-nestedListIndexes rows cols = [(col, row) | col <- [0..cols], row <- [0..rows]]
-
 drawSprite :: CPU -> Int -> Int -> Int -> CPU
-drawSprite cpu x y times = drawSprite' (nestedListIndexes times 8) cpu x y
+drawSprite cpu x y times = drawSprite' (Util.nestedListIndexes times 8) cpu x y
   where
     drawSprite' [] cpu _ _ = cpu
     drawSprite' ((col, row):xs) cpu x y = let
@@ -228,9 +196,9 @@ drawSprite cpu x y times = drawSprite' (nestedListIndexes times 8) cpu x y
 xorVram :: CPU -> Int -> Int -> Int -> CPU
 xorVram cpu x y val = cpu {vram = let 
                                     oldVal = (vram cpu !! y) !! x
-                                    newRow = replace x (xor oldVal val) (vram cpu !! y) 
+                                    newRow = Util.replace x (xor oldVal val) (vram cpu !! y) 
                                   in 
-                                    replace y newRow (vram cpu)}
+                                    Util.replace y newRow (vram cpu)}
 
 opNNN :: Opcode -> Int
 opNNN (_, x, y, z) = shift x 8 + shift y 4 + z

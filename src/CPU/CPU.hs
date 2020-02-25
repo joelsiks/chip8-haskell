@@ -14,11 +14,11 @@ windowWidth  = 64
 
    INVARIANT: TODO
 -}
-data CPU = Cpu { v :: [Int]             -- V Register containing 16 8-bit registrars. Index 0, 1, 2 ... E, F.
+data CPU = Cpu { v :: [Int]             -- 16 V Registers with 8-bit registrars. Index 0, 1, 2 ... E, F.
                , i :: Int               -- 16 bit register for memory address.
                , sound_timer :: Int     
                , delay_timer :: Int     
-               , pc :: Int              -- Pointer to memory for current opcode. 0 =< pc =< 4095
+               , pc :: Int              -- Pointer to memory for current opcode. 0 =< pc < length memory.
                , memory :: [Int]        -- Place to store program data (instructions). 4096 bytes.
                , stack :: [Int]         -- Stack. List of 16 16-bit values.
                , sp :: Int              -- Pointer to current place in the stack.

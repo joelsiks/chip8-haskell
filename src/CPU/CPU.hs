@@ -65,10 +65,10 @@ initMemory rom = fontset ++ (replicate (0x200 - length fontset) 0) ++ padRom rom
   -}
 padRom :: [Int] -> [Int]
 padRom rom
-    | memLeft < 0 = error "Program too large"
-    | rom == [] = error "File error"
-    | otherwise = rom ++ (replicate memLeft 0)
-        where memLeft = 0xE00 - length rom
+  | memLeft < 0 = error "Program too large"
+  | rom == [] = error "File error"
+  | otherwise = rom ++ (replicate memLeft 0)
+      where memLeft = 0xE00 - length rom
 
 -- Fontset for drawing characters to the screen.
 fontset :: [Int]

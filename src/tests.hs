@@ -11,6 +11,49 @@ blankCPU = initCPU [0] (mkStdGen 0)
 -------------------------------- 
 -- CPU Tests
 
+--initCPU
+-- Timers should always be >= 0
+testICPU1 =
+    let cpu = CPU.initCPU [1,2,3] (mkStdGen 0)
+    in
+        TestCase $ assertBool "initCPU [1,2,3] (mkStdGen 0)" (sound_timer cpu >= 0 && delay_timer cpu >= 0)
+
+-- Memory size is constant
+testICPU2 =
+    let cpu = CPU.initCPU [1,2,3] (mkStdGen 0)
+    in
+        TestCase $ assertEqual "initCPU [1,2,3] (mkStdGen 0)" 4096 (length (memory cpu))
+
+-- Vram should be blank and a constant size of 64*32
+testICPU3 =
+    let cpu = CPU.initCPU [1,2,3] (mkStdGen 0)
+    in
+        TestCase $ assertEqual "initCPU [1,2,3] (mkStdGen 0)" (replicate (64*32) 0) (concat (vram cpu))
+
+
+-- initMemory
+-- Check that memory is the correct size
+testIM1 = TestCase $ assertEqual "initMemory [1,2,3]" 4096 (length (CPU.initMemory [1,2,3]))
+-- Check that fontset loaded correctly
+testIM2 = TestCase $ assertEqual "initMemory [1]" 0x90 ((CPU.initMemory [1]) !! 2)
+-- Check that program loaded at correct index
+testIM3 = TestCase $ assertEqual "initMemory [0xA,0xB,0xC]" 0xB ((CPU.initMemory [0xA,0xB,0xC]) !! 513)
+
+-- padRom
+-- Program with padding should be constant size 
+testPR = TestCase $ assertEqual "padRom [1]" 3584 (length (CPU.padRom [1]))
+
+cpuTests = TestList [testICPU1, testICPU2, testICPU3, testIM1, testIM2, testIM3, testPR]
+
+--------------------------------
+-- Rom Tests
+
+-- checkRom
+testCR1 = TestCase $ assertEqual "checkRom [1,2,3]" [1,2,3] (LoadRom.checkRom [1,2,3])
+testCR2 = TestCase $ assertEqual "checkRom ([4097 zeros])" 0 (length (LoadRom.checkRom (replicate 0 4097)))
+
+romTests = TestList [testCR1, testCR2]
+
 -------------------------------- 
 -- Utility tests
 
@@ -143,4 +186,4 @@ emulateTests = TestList [ testOPNNN, testOPNN, testFOp1, testIncPC, testJump, te
 
 -------------------------------- 
 
-runtests = runTestTT $ TestList [utilityTests, emulateTests]
+runtests = runTestTT $ TestList [cpuTests, romTests, utilityTests, emulateTests]

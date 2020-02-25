@@ -214,7 +214,7 @@ storeRegisters cpu idx | idx == 0  = ucpu
 loadRegisters :: CPU -> Int -> CPU
 loadRegisters cpu idx | idx == 0  = ucpu
                       | otherwise = loadRegisters ucpu (idx - 1)
-                        where ucpu = setRegister cpu idx (memory cpu !! i cpu + idx)
+                        where ucpu = setRegister cpu idx (memory cpu !! (i cpu + idx))
 
 drawSprite :: CPU -> Int -> Int -> Int -> CPU
 drawSprite cpu x y times = drawSprite' (Util.nestedListIndexes times 8) cpu x y

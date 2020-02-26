@@ -63,3 +63,21 @@ fel som hade tagit oss en bra stund att debugga annars.
 Mycket refactoring av kod.
 Implemeneterat generateRandomValue för opcode 0xCXNN.
 
+26/02 10:00-14:00
+
+Vi har suttit ner tillsammans i gruppen och kopplat ihop den grafiska delen med själva CPUn.
+Det var ett par fel i CPUn, mer specifikt några opcodes, där felet berodde på att vi adderade
+två värden som 32-bitars värden där vi i själva verket skulle ha adderat dom som 8-bitars värden.
+Detta löstes enkelt genom att köra modulo 256 på det adderade eller subtraherade värderna.
+
+checkIfInput implementerades för opcode 0xFX0A.
+
+Har även ändrat i implementationen för drawSprite och xorVram då collision detection inte
+gick av 100% av tiden.
+
+26/02 17:30-18:30
+
+Lagt till fulla specifikationer för funktioner i Emulate.hs där funktionerna ansågs vara av
+signifikant komplexitet. Har även ändrat i många funktioner där parenteser kan tas bort och
+där man kan ersätta med enklare implementationer.
+

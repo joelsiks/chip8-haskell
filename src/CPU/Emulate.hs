@@ -2,21 +2,10 @@
 module CPU.Emulate where
 
 import Control.Lens
-import CPU.CPU
+import CPU.CPU as CPU
 import qualified CPU.Utility as Util
 import Data.Bits
 import System.Random
-
-emulateLoop :: CPU -> IO ()
-emulateLoop cpu = do
-  -- putStrLn $ "opcode: " ++ (show (fetchOpcode cpu))
-  print cpu
-  let newCPU = emulateCycle cpu
-  -- draw screen
-  -- get keyboard state
-  -- FX0A wait here?
-  -- delay to set cpu speed?
-  emulateLoop newCPU
 
 {- emulateCycle cpu
    Emulates 1 cycle of the CPU
@@ -26,7 +15,7 @@ emulateLoop cpu = do
              TODO?
 -}
 emulateCycle :: CPU -> CPU
-emulateCycle cpu = decreseTimers $ executeOpcode cpu (fetchOpcode cpu)
+emulateCycle cpu = CPU.setDefaultKeyboard $ decreseTimers $ executeOpcode cpu (fetchOpcode cpu)
 
 {- decreseTimer cpu
    Decreses the delay timer and sound timer of the cpu by 1
@@ -132,8 +121,7 @@ executeOpcode cpu opcode =
     (0xF, x, 0x0, 0x7) ->
       incPC $ setRegister cpu x (delay_timer cpu)
     (0xF, x, 0x0, 0xA) ->
-      -- TODO
-      cpu
+      checkIfInput cpu x
     (0xF, x, 0x1, 0x5) ->
       incPC $ cpu {delay_timer = v cpu !! x}
     (0xF, x, 0x1, 0x8) ->
@@ -220,6 +208,14 @@ generateRandomValue cpu idx andVal =
     (randomValue, newStdGen) = randomR (0, 255) (rgen cpu)
     ucpu = cpu {rgen = newStdGen}
   in setRegister ucpu idx (randomValue .&. andVal)
+
+-- Checks if any keys are pressed, if any are, set register reg to the index of the first key pressed.
+checkIfInput :: CPU -> Int -> CPU
+checkIfInput cpu reg | (length $ filter (==True) (keyboard cpu)) > 0 = cpu
+                     | otherwise = incPC $ setRegister cpu reg (findIndexTrue (keyboard cpu) 0)
+                       where
+                         findIndexTrue (x:xs) idx | x = idx
+                                                  | otherwise = findIndexTrue xs (idx + 1)
 
 drawSprite :: CPU -> Int -> Int -> Int -> CPU
 drawSprite cpu x y times = drawSprite' (Util.nestedListIndexes times 8) cpu x y

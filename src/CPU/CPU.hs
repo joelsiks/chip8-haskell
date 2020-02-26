@@ -43,10 +43,16 @@ initCPU rom randomgen = Cpu { v = replicate 16 0
                         , stack = replicate 16 0
                         , sp = 0
                         , vram = defaultVRAM
-                        , keyboard = replicate 16 False
+                        , keyboard = defaultKeyboard
                         , keypad_waiting = False
                         , rgen = randomgen
                         }
+
+setDefaultKeyboard :: CPU -> CPU
+setDefaultKeyboard cpu = cpu {keyboard = defaultKeyboard}
+
+defaultKeyboard :: [Bool]
+defaultKeyboard = replicate 16 False
 
 defaultVRAM :: [[Int]]
 defaultVRAM = replicate windowHeight (replicate windowWidth 0)

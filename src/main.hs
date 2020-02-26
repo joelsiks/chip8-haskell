@@ -9,7 +9,6 @@ import Graphics.Gloss (blue)
 import System.Random
 
 
-
 main :: IO ()
 main = do
   let ghciTestPath = "../roms/PONG"
@@ -17,8 +16,7 @@ main = do
   rom <- LoadRom.readRom cabalRunTestPath
   let cpu = CPU.initCPU rom (mkStdGen 0)
     -- bätre slumpgenerering
-  --Emulate.emulateLoop cpu
-  putStrLn "Hello, World!"
+  --putStrLn "Hello, World!"
   
   let displaySettings = Settings "Test" blue 60
   startRenderer displaySettings cpu onRender onInput onUpdate
@@ -52,4 +50,4 @@ onInput key cpu = cpu {keyboard = setKeyTrue key (keyboard cpu)}
 
 -- Called every frame before onRenderer
 onUpdate :: Float -> CPU -> CPU
-onUpdate time cpu = cpu
+onUpdate _ cpu = Emulate.emulateCycle cpu

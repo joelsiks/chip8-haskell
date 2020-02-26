@@ -7,7 +7,7 @@ import qualified CPU.Utility as Util
 import Render.Renderer
 import Graphics.Gloss (blue)
 import System.Random
-
+import Debug.Trace
 
 main :: IO ()
 main = do
@@ -18,7 +18,7 @@ main = do
     -- bätre slumpgenerering
   --putStrLn "Hello, World!"
   
-  let displaySettings = Settings "Test" blue 60
+  let displaySettings = Settings "Test" blue 400
   startRenderer displaySettings cpu onRender onInput onUpdate
 
 -- Called last every frame
@@ -26,27 +26,27 @@ onRender :: CPU -> [Int]
 onRender cpu = concat (vram cpu)
 
 -- Celled on input
-onInput :: Char -> CPU -> CPU
-onInput key cpu = cpu {keyboard = setKeyTrue key (keyboard cpu)}
+onInput :: Char -> Bool -> CPU -> CPU
+onInput key isDown cpu = trace ("Keys: " ++ show key) $ cpu {keyboard = setKey key isDown (keyboard cpu)}
   where
-    setKeyTrue :: Char -> [Bool] -> [Bool]
-    setKeyTrue '1' keys = Util.replace 0x0 True keys
-    setKeyTrue '2' keys = Util.replace 0x1 True keys
-    setKeyTrue '3' keys = Util.replace 0x2 True keys
-    setKeyTrue '4' keys = Util.replace 0x3 True keys
-    setKeyTrue 'q' keys = Util.replace 0x4 True keys
-    setKeyTrue 'w' keys = Util.replace 0x5 True keys
-    setKeyTrue 'e' keys = Util.replace 0x6 True keys
-    setKeyTrue 'r' keys = Util.replace 0x7 True keys
-    setKeyTrue 'a' keys = Util.replace 0x8 True keys
-    setKeyTrue 's' keys = Util.replace 0x9 True keys
-    setKeyTrue 'd' keys = Util.replace 0xA True keys
-    setKeyTrue 'f' keys = Util.replace 0xB True keys
-    setKeyTrue 'z' keys = Util.replace 0xC True keys
-    setKeyTrue 'x' keys = Util.replace 0xD True keys
-    setKeyTrue 'c' keys = Util.replace 0xE True keys
-    setKeyTrue 'v' keys = Util.replace 0xF True keys
-    setKeyTrue _ keys = keys
+    setKey :: Char -> Bool -> [Bool] -> [Bool]
+    setKey '1' b keys = Util.replace 0x0 b keys
+    setKey '2' b keys = Util.replace 0x1 b keys
+    setKey '3' b keys = Util.replace 0x2 b keys
+    setKey '4' b keys = Util.replace 0x3 b keys
+    setKey 'q' b keys = Util.replace 0x4 b keys
+    setKey 'w' b keys = Util.replace 0x5 b keys
+    setKey 'e' b keys = Util.replace 0x6 b keys
+    setKey 'r' b keys = Util.replace 0x7 b keys
+    setKey 'a' b keys = Util.replace 0x8 b keys
+    setKey 's' b keys = Util.replace 0x9 b keys
+    setKey 'd' b keys = Util.replace 0xA b keys
+    setKey 'f' b keys = Util.replace 0xB b keys
+    setKey 'z' b keys = Util.replace 0xC b keys
+    setKey 'x' b keys = Util.replace 0xD b keys
+    setKey 'c' b keys = Util.replace 0xE b keys
+    setKey 'v' b keys = Util.replace 0xF b keys
+    setKey _ _ keys = keys
 
 -- Called every frame before onRenderer
 onUpdate :: Float -> CPU -> CPU

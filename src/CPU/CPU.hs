@@ -26,8 +26,8 @@ data CPU = Cpu { v :: [Int]             -- 16 V Registers with 8-bit registrars.
                , stack :: [Int]         -- Stack. List of 16 16-bit values.
                , sp :: Int              -- Pointer to current place in the stack.
                , vram :: [[Int]]        -- Memory containing what pixels are to be drawed on the screen.
+               , vram_changed :: Bool
                , keyboard :: [Bool]     -- List with bools representing if a certain key has been pressed.
-               , keypad_waiting :: Bool -- List with bools representing if a certain key has been pressed.
                , rgen :: StdGen         -- Random number generator.
                } deriving (Show)
 
@@ -35,18 +35,18 @@ data CPU = Cpu { v :: [Int]             -- 16 V Registers with 8-bit registrars.
 -- set to their initial values.
 initCPU :: [Int] -> StdGen -> CPU
 initCPU rom randomgen = Cpu { v = replicate 16 0
-                        , i = 0x200
-                        , sound_timer = 0
-                        , delay_timer = 0
-                        , pc = 0x200
-                        , memory = initMemory rom
-                        , stack = replicate 16 0
-                        , sp = 0
-                        , vram = defaultVRAM
-                        , keyboard = defaultKeyboard
-                        , keypad_waiting = False
-                        , rgen = randomgen
-                        }
+                            , i = 0x200
+                            , sound_timer = 0
+                            , delay_timer = 0
+                            , pc = 0x200
+                            , memory = initMemory rom
+                            , stack = replicate 16 0
+                            , sp = 0
+                            , vram = defaultVRAM
+                            , vram_changed = False
+                            , keyboard = defaultKeyboard
+                            , rgen = randomgen
+                            }
 
 setDefaultKeyboard :: CPU -> CPU
 setDefaultKeyboard cpu = cpu {keyboard = defaultKeyboard}

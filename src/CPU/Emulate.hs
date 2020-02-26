@@ -15,7 +15,7 @@ import System.Random
              TODO?
 -}
 emulateCycle :: CPU -> CPU
-emulateCycle cpu = CPU.setDefaultKeyboard $ decreseTimers $ executeOpcode cpu (fetchOpcode cpu)
+emulateCycle cpu = decreseTimers $ executeOpcode cpu (fetchOpcode cpu)
 
 {- decreseTimer cpu
    Decreses the delay timer and sound timer of the cpu by 1

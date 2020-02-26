@@ -6,6 +6,7 @@ import CPU.Emulate as Emulate
 import qualified CPU.Utility as Util
 import Render.Renderer
 import Graphics.Gloss (blue)
+import Graphics.Gloss.Interface.Environment (getScreenSize)
 import System.Random
 import Debug.Trace
 
@@ -17,8 +18,8 @@ main = do
   let cpu = CPU.initCPU rom (mkStdGen 0)
     -- bätre slumpgenerering
   --putStrLn "Hello, World!"
-  
-  let displaySettings = Settings "Test" blue 400
+  size <- getScreenSize 
+  let displaySettings = Settings size "Test" blue 400
   startRenderer displaySettings cpu onRender onInput onUpdate
 
 -- Called last every frame

@@ -14,6 +14,7 @@ import Data.ByteString (ByteString, pack) -- Same as a bitmap
 -}
 data DisplaySettings = Settings
     {
+        size       :: (Int, Int),
         name       :: String,
         background :: Color,
         fps        :: Int
@@ -39,18 +40,15 @@ createFrame s pixels = bitmapOfByteString 64 32 (BitmapFormat (TopToBottom) (PxR
                 f a 1 = a ++ onCollor
                 f a _ = a ++ offCollor
 
-{-  window settings
-    Creates a display from settings
--}
-window :: DisplaySettings -> Display
-window s = InWindow (name s) (64,32) (0,0)
-
 {-  renderer settings func cpu
     Applies createFrame to the pixels created from applying func to cpu
     PRE: cpu is in a functional state
 -}
 renderer :: DisplaySettings -> (CPU -> [Int]) -> CPU -> Picture
-renderer s f state = scale 10 10 $ createFrame s $ f state
+renderer s f state = scale (x/64) (y/32) $ createFrame s $ f state
+    where
+        (a,b) = (size s)
+        (x,y) = (realToFrac a, realToFrac b)
 
 {-  handleKeys func event cpu
     Applies func to cpu whenever a key pressed event is called
@@ -72,4 +70,4 @@ handleKeys _ _ game = game
                   Calls hFunc everytime a key is pressed
 -}
 startRenderer :: DisplaySettings -> CPU -> (CPU -> [Int]) -> (Char -> Bool -> CPU -> CPU) -> (Float -> CPU -> CPU) -> IO()
-startRenderer s gS rF hF uF = play (window s) (background s) (fps s) gS (renderer s rF) (handleKeys hF) uF 
+startRenderer s gS rF hF uF = play FullScreen (background s) (fps s) gS (renderer s rF) (handleKeys hF) uF 

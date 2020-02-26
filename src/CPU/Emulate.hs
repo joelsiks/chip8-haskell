@@ -1,6 +1,7 @@
 
-module CPU.Emulate where
+module CPU.Emulate (Opcode, emulateCycle) where
 
+import Debug.Trace
 import Control.Lens
 import CPU.CPU as CPU
 import qualified CPU.Utility as Util
@@ -79,7 +80,7 @@ executeOpcode cpu opcode =
     (0x6, x, _, _) ->
       incPC $ setRegister cpu x (opNN opcode)
     (0x7, x, _, _) ->
-      incPC $ setRegister cpu x ((v cpu !! x) + opNN opcode)
+      incPC $ setRegister cpu x ((v cpu !! x + opNN opcode) `mod` 256)
     (0x8, x, y, 0x0) ->
       incPC $ setRegister cpu x (v cpu !! y)
     (0x8, x, y, 0x1) ->
@@ -91,24 +92,26 @@ executeOpcode cpu opcode =
     (0x8, x, y, 0x4) ->
       let 
         addVal = v cpu !! x + v cpu !! y
-        ucpu = setRegister cpu x addVal
-      in incPC $ setRegister ucpu 0xF (if addVal > 0xFF then 1 else 0)
+        ucpu = setRegister cpu x (addVal .&. 0xFF)
+      in 
+        incPC $ setRegister ucpu 0xF (if addVal > 0xFF then 1 else 0)
     (0x8, x, y, 0x5) ->
-      incPC $ setRegister cpu x (v cpu !! x - v cpu !! y)
+      let
+        subVal = v cpu !! x - v cpu !! y
+        ucpu = setRegister cpu 0xF (if subVal < 0 then 1 else 0)
+      in 
+        incPC $ setRegister ucpu x (subVal `mod` 256)
     (0x8, x, y, 0x6) ->
       incPC $ setRegister ucpu x (shiftR (v cpu !! x) 1)
-        where
-          ucpu = setRegister cpu 0xF (v cpu !! x .&. 0x1)
+        where ucpu = setRegister cpu 0xF ((v cpu !! x) .&. 1)
     (0x8, x, y, 0x7) ->
       incPC $ setRegister ucpu x (v cpu !! y - v cpu !! x)
-        where
-          ucpu = setRegister cpu 0xF (if v cpu !! y > v cpu !! x then 1 else 0)
+        where ucpu = setRegister cpu 0xF (if v cpu !! y > v cpu !! x then 1 else 0)
     (0x8, x, y, 0xE) ->
       incPC $ setRegister ucpu x (shiftL (v cpu !! x) 1)
-        where
-          ucpu = setRegister cpu 0xF (shiftR (v cpu !! x) 7)
+        where ucpu = setRegister cpu 0xF (shiftR (v cpu !! x) 7)
     (0x9, x, y, 0x0) ->
-      incPC $ skipInstructionIf cpu (v cpu !! x /= v cpu !! y)
+      incPC $ skipInstructionIf cpu ((v cpu !! x) /= (v cpu !! y))
     (0xA, _, _, _) ->
       incPC $ cpu {i = opNNN opcode}
     (0xB, _, _, _) ->
@@ -141,8 +144,8 @@ executeOpcode cpu opcode =
       incPC $ storeRegisters cpu x
     (0xF, x, 0x6, 0x5) ->
       incPC $ loadRegisters cpu x
-    -- If the instruction is not defined we just return the unchanged cpu instead of
-    -- throwing an error.
+    -- TODO: Here we should throw an error and exit the program because an undefined
+    --       opcode that doesn't execute could lead to undefined behaviour.
     _ -> cpu
 
 -- Increments the program counter of a CPU by 2 (one instruction).
@@ -161,7 +164,7 @@ skipInstructionIf cpu pred | pred      = incPC cpu
 -- Calls a subroutine by inserting the current position into the stack and jumping to
 -- a specific address.
 callSubroutine :: CPU -> Int -> CPU
-callSubroutine cpu addr = jumpToAddress ucpu addr
+callSubroutine cpu = jumpToAddress ucpu
   where ucpu = insertToStack cpu (pc (incPC cpu))
 
 -- Returns from a subroutine by decrementing the stack pointer by 1 and jumping to the stored location
@@ -184,13 +187,20 @@ setRegister cpu idx val = cpu {v = Util.replace idx val (v cpu)}
 setMemory :: CPU -> Int -> Int -> CPU
 setMemory cpu pos val = cpu {memory = Util.replace pos val (memory cpu)}
 
--- Stores the binary representation of the value located in (v cpu) at index idx to the memory.
+{- storeBCDRepresentation cpu idx
+   Stores the binary-coded decimal representation of the number in (v cpu) to memory.
+
+   PRE: idx is a single number in base16
+   RETURNS: cpu where the number in (v cpu !! idx) has been offloaded to the memory starting at position (i cpu)
+   EXAMPLES: storeBCDRepresentation (cpu where v cpu !! 0x0 = 231) 0x0 = (cpu where part of memory contains [..., 2, 3, 1, ...])
+             storeBCDRepresentation (cpu where v cpu !! 0x0 = 194) 0x0 = (cpu where part of memory contains [..., 1, 9, 4, ...])
+-}
 storeBCDRepresentation :: CPU -> Int -> CPU
-storeBCDRepresentation cpu vidx = setMemory ucpu2 (i cpu) (v cpu !! vidx `div` 100)
+storeBCDRepresentation cpu idx = setMemory ucpu2 (i cpu) (v cpu !! idx `div` 100)
   where
-    ucpu2 = setMemory ucpu1 (i cpu + 1) ((v cpu !! vidx `mod` 100) `div` 10)
+    ucpu2 = setMemory ucpu1 (i cpu + 1) ((v cpu !! idx `mod` 100) `div` 10)
       where
-        ucpu1 = setMemory cpu (i cpu + 2) (v cpu !! vidx `mod` 10)
+        ucpu1 = setMemory cpu (i cpu + 2) (v cpu !! idx `mod` 10)
 
 -- Copies all the values from (v cpu) register to the memory starting at position (i cpu).
 storeRegisters :: CPU -> Int -> CPU
@@ -204,7 +214,14 @@ loadRegisters cpu idx | idx == 0  = ucpu
                       | otherwise = loadRegisters ucpu (idx - 1)
                         where ucpu = setRegister cpu idx (memory cpu !! (i cpu + idx))
 
--- Generates a random value and stores it in (v cpu) at idx.
+{- generateRandomValue cpu idx andVal
+   Sets a register in a CPU to a random value.
+
+   PRE: andVal > 0, idx is a single number in base16
+   RETURNS: cpu where (v cpu !! idx) has been set to ((a random number) .&. andVal)
+   EXAMPLES: generateRandomValue cpu 0x0 0x25 = (cpu where (v cpu !! 0x0)) = (random number) .&. 0x25
+             generateRandomValue cpu 0xA 0x8C = (cpu where (v cpu !! 0xA)) = (random number) .&. 0x8C
+-}
 generateRandomValue :: CPU -> Int -> Int -> CPU
 generateRandomValue cpu idx andVal = 
   let
@@ -213,15 +230,33 @@ generateRandomValue cpu idx andVal =
   in setRegister ucpu idx (randomValue .&. andVal)
 
 -- Checks if any keys are pressed, if any are, set register reg to the index of the first key pressed.
+{- checkIfInput cpu regIndex
+
+   PRE: regIndex is a single number in base16
+   RETURNS: unaltered cpu if there are no registered keys, otherwise cpu where (v cpu) !! regIndex
+            has been set to the index of the first registered key.
+   EXAMPLES: checkIfInput (cpu where number 1 is the only key pressed)         0x6 = (cpu where (v cpu) !! 0x6 = 0x0)
+             checkIfInput (cpu where number 3 and 'q' were pressed)            0x6 = (cpu where (v cpu) !! 0x6 = 0x2)
+             checkIfInput (cpu where character 'q' is the only key pressed)    0x6 = (cpu where (v cpu) !! 0x6 = 0x3)
+
+-}
 checkIfInput :: CPU -> Int -> CPU
-checkIfInput cpu reg | (length $ filter (==True) (keyboard cpu)) == 0 = cpu
+checkIfInput cpu reg | null $ filter (==True) (keyboard cpu) = cpu
                      | otherwise = incPC $ setRegister cpu reg (findIndexTrue (keyboard cpu) 0)
                        where
                          findIndexTrue (x:xs) idx | x = idx
                                                   | otherwise = findIndexTrue xs (idx + 1)
 
+{- drawSprite cpu x y times
+   Updates a CPU state to where a set number of pixels has been added/removed from the CPUs VRAM.
+
+   PRE: times > 0 
+   RETURNS: cpu where (vram cpu) has been updated to XOR out pixels starting at
+            ((vram cpu) !! y) !! x.
+   EXAMPLES: TODO
+-}
 drawSprite :: CPU -> Int -> Int -> Int -> CPU
-drawSprite cpu x y times = drawSprite' (Util.nestedListIndexes (times-1) 7) cpu x y
+drawSprite cpu x y times = drawSprite' (Util.nestedListIndexes (times-1) 7) (setRegister cpu 0xF 0) x y
   where
     drawSprite' [] cpu _ _ = cpu
     drawSprite' ((col, row):xs) cpu x y = let
@@ -231,18 +266,28 @@ drawSprite cpu x y times = drawSprite' (Util.nestedListIndexes (times-1) 7) cpu 
                                           in 
                                             drawSprite' xs (xorVram cpu x2 y2 output) x y
 
+{- xorVram cpu x y value
+   XORs out a value to a CPUs VRAM
+
+   PRE: value = 0 or 1
+   RETURNS: cpu where value has been XOR:ed to (vram cpu) at row y and column x.
+   EXAMPLES: xorVram (cpu where vram is [[0,0,0]) 1 1 1 = (cpu where vram is [[0,0,0])
+                                         [0,0,0]                              [0,1,0]
+                                         [0,0,0]]                             [0,0,0]]
+-}
 xorVram :: CPU -> Int -> Int -> Int -> CPU
 xorVram cpu x y val = 
   let
     oldVal = (vram cpu !! y) !! x
     newRow = Util.replace x (xor oldVal val) (vram cpu !! y) 
-    vramChangedCPU = cpu {vram = Util.replace y newRow (vram cpu)}
-    ucpu = setRegister vramChangedCPU 0xF 0
+    ucpu = cpu {vram = Util.replace y newRow (vram cpu)}
   in 
-    setRegister ucpu 0xF ((oldVal .&. val) .|. v ucpu !! 0xF)
+    setRegister ucpu 0xF (if oldVal == 1 && (vram ucpu !! y) !! x == 0 then 1 else v ucpu !! 0xF)
 
+-- Calculates the combined hex value of the first three 4-bit values in an Opcode
 opNNN :: Opcode -> Int
 opNNN (_, x, y, z) = shift x 8 + shift y 4 + z
 
+-- Calculates the combined hex value of the first two 4-bit values in an Opcode
 opNN :: Opcode -> Int
 opNN (_, _, x, y) = shift x 4 + y

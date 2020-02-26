@@ -19,3 +19,10 @@
 - Implementerade Renderern i main
 - Implementerade hantering av inputs till CPU:n
 - Ändrade typen av inputs onRender funktionen till startRenderer från [[Bool]] till [Int]
+
+26/02 10:00 - 14:00
+- Diskuterade tillsamans de nästa stegen i utvecklingen
+- Vi har kopplat ihop delarna av programet så att vi har en 
+  "fugerande" emulator (finns många saker kvar att göra)
+- Implementerade skalning av bilden så att emulatorn nu körs i fullscreen
+- Skrev delar av dokumentationen (nämnligen om vad en emulator är samt vad chip-8 är)

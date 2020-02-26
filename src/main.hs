@@ -8,7 +8,6 @@ import Render.Renderer
 import Graphics.Gloss (blue)
 import Graphics.Gloss.Interface.Environment (getScreenSize)
 import System.Random
-import Debug.Trace
 
 main :: IO ()
 main = do
@@ -19,7 +18,7 @@ main = do
     -- bätre slumpgenerering
   --putStrLn "Hello, World!"
   size <- getScreenSize 
-  let displaySettings = Settings size "Test" blue 400
+  let displaySettings = Settings size "Test" blue 60
   startRenderer displaySettings cpu onRender onInput onUpdate
 
 -- Called last every frame
@@ -28,7 +27,7 @@ onRender cpu = concat (vram cpu)
 
 -- Celled on input
 onInput :: Char -> Bool -> CPU -> CPU
-onInput key isDown cpu = trace ("Keys: " ++ show key) $ cpu {keyboard = setKey key isDown (keyboard cpu)}
+onInput key isDown cpu = cpu {keyboard = setKey key isDown (keyboard cpu)}
   where
     setKey :: Char -> Bool -> [Bool] -> [Bool]
     setKey '1' b keys = Util.replace 0x0 b keys

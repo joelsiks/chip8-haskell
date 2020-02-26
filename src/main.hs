@@ -20,8 +20,8 @@ main = do
   --Emulate.emulateLoop cpu
   putStrLn "Hello, World!"
   
-  --let displaySettings = Settings "Test" blue 60
-  --startRenderer displaySettings cpu onRender onInput onUpdate
+  let displaySettings = Settings "Test" blue 60
+  startRenderer displaySettings cpu onRender onInput onUpdate
 
 -- Called last every frame
 onRender :: CPU -> [Int]

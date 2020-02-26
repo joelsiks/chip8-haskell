@@ -50,7 +50,7 @@ window s = InWindow (name s) (64,32) (0,0)
     PRE: cpu is in a functional state
 -}
 renderer :: DisplaySettings -> (CPU -> [Int]) -> CPU -> Picture
-renderer s f state = createFrame s $ f state
+renderer s f state = scale 10 10 $ createFrame s $ f state
 
 {-  handleKeys func event cpu
     Applies func to cpu whenever a key pressed event is called

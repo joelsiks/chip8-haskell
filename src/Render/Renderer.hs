@@ -56,8 +56,9 @@ renderer s f state = createFrame s $ f state
     Applies func to cpu whenever a key pressed event is called
     PRE: cpu is in a functional state
 -}
-handleKeys :: (Char -> CPU -> CPU) -> Event -> CPU -> CPU
-handleKeys f (EventKey (Char key) Down _ _) game = f key game
+handleKeys :: (Char -> Bool -> CPU -> CPU) -> Event -> CPU -> CPU
+handleKeys f (EventKey (Char key) Down _ _) game = f key True game
+handleKeys f (EventKey (Char key) Up _ _) game = f key False game
 handleKeys _ _ game = game
 
 {-  startRenderer settings cpu rFunc hFunc uFunc
@@ -70,5 +71,5 @@ handleKeys _ _ game = game
                   Calls uFunc every frame
                   Calls hFunc everytime a key is pressed
 -}
-startRenderer :: DisplaySettings -> CPU -> (CPU -> [Int]) -> (Char -> CPU -> CPU) -> (Float -> CPU -> CPU) -> IO()
+startRenderer :: DisplaySettings -> CPU -> (CPU -> [Int]) -> (Char -> Bool -> CPU -> CPU) -> (Float -> CPU -> CPU) -> IO()
 startRenderer s gS rF hF uF = play (window s) (background s) (fps s) gS (renderer s rF) (handleKeys hF) uF 

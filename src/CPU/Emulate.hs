@@ -79,7 +79,7 @@ executeOpcode cpu opcode =
     (0x6, x, _, _) ->
       incPC $ setRegister cpu x (opNN opcode)
     (0x7, x, _, _) ->
-      incPC $ setRegister cpu x (v cpu !! x + opNN opcode)
+      incPC $ setRegister cpu x ((v cpu !! x) + opNN opcode)
     (0x8, x, y, 0x0) ->
       incPC $ setRegister cpu x (v cpu !! y)
     (0x8, x, y, 0x1) ->
@@ -89,7 +89,10 @@ executeOpcode cpu opcode =
     (0x8, x, y, 0x3) ->
       incPC $ setRegister cpu x (xor (v cpu !! x) (v cpu !! y))
     (0x8, x, y, 0x4) ->
-      incPC $ setRegister cpu x (v cpu !! x + v cpu !! y)
+      let 
+        addVal = v cpu !! x + v cpu !! y
+        ucpu = setRegister cpu x addVal
+      in incPC $ setRegister ucpu 0xF (if addVal > 0xFF then 1 else 0)
     (0x8, x, y, 0x5) ->
       incPC $ setRegister cpu x (v cpu !! x - v cpu !! y)
     (0x8, x, y, 0x6) ->
@@ -211,14 +214,14 @@ generateRandomValue cpu idx andVal =
 
 -- Checks if any keys are pressed, if any are, set register reg to the index of the first key pressed.
 checkIfInput :: CPU -> Int -> CPU
-checkIfInput cpu reg | (length $ filter (==True) (keyboard cpu)) > 0 = cpu
+checkIfInput cpu reg | (length $ filter (==True) (keyboard cpu)) == 0 = cpu
                      | otherwise = incPC $ setRegister cpu reg (findIndexTrue (keyboard cpu) 0)
                        where
                          findIndexTrue (x:xs) idx | x = idx
                                                   | otherwise = findIndexTrue xs (idx + 1)
 
 drawSprite :: CPU -> Int -> Int -> Int -> CPU
-drawSprite cpu x y times = drawSprite' (Util.nestedListIndexes times 8) cpu x y
+drawSprite cpu x y times = drawSprite' (Util.nestedListIndexes (times-1) 7) cpu x y
   where
     drawSprite' [] cpu _ _ = cpu
     drawSprite' ((col, row):xs) cpu x y = let
@@ -229,11 +232,14 @@ drawSprite cpu x y times = drawSprite' (Util.nestedListIndexes times 8) cpu x y
                                             drawSprite' xs (xorVram cpu x2 y2 output) x y
 
 xorVram :: CPU -> Int -> Int -> Int -> CPU
-xorVram cpu x y val = cpu {vram = let 
-                                    oldVal = (vram cpu !! y) !! x
-                                    newRow = Util.replace x (xor oldVal val) (vram cpu !! y) 
-                                  in 
-                                    Util.replace y newRow (vram cpu)}
+xorVram cpu x y val = 
+  let
+    oldVal = (vram cpu !! y) !! x
+    newRow = Util.replace x (xor oldVal val) (vram cpu !! y) 
+    vramChangedCPU = cpu {vram = Util.replace y newRow (vram cpu)}
+    ucpu = setRegister vramChangedCPU 0xF 0
+  in 
+    setRegister ucpu 0xF ((oldVal .&. val) .|. v ucpu !! 0xF)
 
 opNNN :: Opcode -> Int
 opNNN (_, x, y, z) = shift x 8 + shift y 4 + z

@@ -11,14 +11,14 @@ import Debug.Trace
 
 main :: IO ()
 main = do
-  let ghciTestPath = "../roms/PONG"
-  let cabalRunTestPath = "roms/PONG"
+  let ghciTestPath = "../roms/TEST_OPCODES"
+  let cabalRunTestPath = "roms/TEST_OPCODES"
   rom <- LoadRom.readRom cabalRunTestPath
   let cpu = CPU.initCPU rom (mkStdGen 0)
     -- bätre slumpgenerering
   --putStrLn "Hello, World!"
   
-  let displaySettings = Settings "Test" blue 400
+  let displaySettings = Settings "Test" blue 100
   startRenderer displaySettings cpu onRender onInput onUpdate
 
 -- Called last every frame

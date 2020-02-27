@@ -2,21 +2,23 @@ module Main where
 
 import CPU.CPU as CPU
 import CPU.LoadRom as LoadRom
-import CPU.Emulate as Emulate
-import qualified CPU.Utility as Util
+import CPU.Emulate as Emulate (emulateCycle)
+import CPU.Utility as Util (replace)
 import Render.Renderer
 import Graphics.Gloss (blue)
 import Graphics.Gloss.Interface.Environment (getScreenSize)
 import System.Random
+import Data.Time.Clock.POSIX
 
 main :: IO ()
 main = do
   let ghciTestPath = "../roms/HIDDEN"
   let cabalRunTestPath = "roms/HIDDEN"
   rom <- LoadRom.readRom cabalRunTestPath
-  let cpu = CPU.initCPU rom (mkStdGen 0)
-    -- bätre slumpgenerering
-  --putStrLn "Hello, World!"
+
+  rndSeed <- fmap round getPOSIXTime
+  let cpu = CPU.initCPU rom (mkStdGen rndSeed)
+
   size <- getScreenSize 
   let displaySettings = Settings size "Test" blue 100
   startRenderer displaySettings cpu onRender onInput onUpdate

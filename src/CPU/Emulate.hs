@@ -1,5 +1,5 @@
 
-module CPU.Emulate (Opcode, emulateCycle) where
+module CPU.Emulate where
 
 import Debug.Trace
 import Control.Lens
@@ -28,7 +28,7 @@ emulateCycle cpu = decreseTimers $ executeOpcode cpu (fetchOpcode cpu)
 decreseTimers :: CPU -> CPU
 decreseTimers cpu = cpu {sound_timer = max 0 (sound_timer cpu - 1), delay_timer = max 0 (delay_timer cpu - 1)}
 
-{- Represents an instruction for the CHIP-8.
+{- Represents an instruction for the CHIP-8
    Opcode is a two-byte value that is stored in big-endian format.
    Each Integer in Opcode is a hexadecimal value between 0-F.
    The two first Ints in Opcode corresponds to the first byte of the instruction, 
@@ -42,11 +42,10 @@ type Opcode = (Int, Int, Int, Int)
 {- fetchOpcode cpu
    Reads an opcode from the memory of a CPU.
 
-   PRE: (pc cpu) does not point outside the size of memory.
-   RETURNS: the four hexadecimal values that make up the two following bytes that (pc cpu) points to
-            in (memory cpu).
-   EXAMPLES: fetchOpcode ((pc cpu) points to [..., 0x12, 0x34, ..]) = (0x1, 0x2, 0x3, 0x4)
-             fetchOpcode ((pc cpu) points to [..., 0xA3, 0xD8, ..]) = (0xA, 0x3, 0xD, 0x8)
+   RETURNS: the four hexadecimal values that make up the bytes that (pc cpu) and (pc cpu + 1) 
+            points to in (memory cpu).
+   EXAMPLES: fetchOpcode (cpu where (pc cpu and pc cpu + 1) points to [..., 0x12, 0x34, ..]) = (0x1, 0x2, 0x3, 0x4)
+             fetchOpcode (cpu where (pc cpu and pc cpu + 1) points to [..., 0xA3, 0xD8, ..]) = (0xA, 0x3, 0xD, 0x8)
 -}
 fetchOpcode :: CPU -> Opcode
 fetchOpcode cpu = (a1, a2, b1, b2)
@@ -55,7 +54,7 @@ fetchOpcode cpu = (a1, a2, b1, b2)
     (b1, b2) = Util.splitByte $ memory cpu !! (pc cpu + 1)
 
 {- executeOpcode cpu opcode
-   Executes a given opcode and alters the state of the CPU it was executed on.
+   Executes an opcode and alters the state of the CPU it was executed on.
    
    RETURNS: cpu where opcode has been executed and altered the state of cpu in some way.
    EXAMPLES: TODO
@@ -101,15 +100,13 @@ executeOpcode cpu opcode =
         ucpu = setRegister cpu 0xF (if subVal < 0 then 1 else 0)
       in 
         incPC $ setRegister ucpu x (subVal `mod` 256)
-    (0x8, x, y, 0x6) ->
-      incPC $ setRegister ucpu x (shiftR (v cpu !! x) 1)
-        where ucpu = setRegister cpu 0xF ((v cpu !! x) .&. 1)
+    (0x8, x, _, 0x6) ->
+      incPC $ shiftRegRight cpu x
     (0x8, x, y, 0x7) ->
       incPC $ setRegister ucpu x (v cpu !! y - v cpu !! x)
         where ucpu = setRegister cpu 0xF (if v cpu !! y > v cpu !! x then 1 else 0)
-    (0x8, x, y, 0xE) ->
-      incPC $ setRegister ucpu x ((shiftL (v cpu !! x) 1) `mod` 256)
-        where ucpu = setRegister cpu 0xF (shiftR (v cpu !! x) 7)
+    (0x8, x, _, 0xE) ->
+      incPC $ shiftRegLeft cpu x
     (0x9, x, y, 0x0) ->
       incPC $ skipInstructionIf cpu ((v cpu !! x) /= (v cpu !! y))
     (0xA, _, _, _) ->
@@ -134,8 +131,7 @@ executeOpcode cpu opcode =
       incPC $ cpu {sound_timer = v cpu !! x}
     (0xF, x, 0x1, 0xE) ->
       incPC $ ucpu {i = i cpu + v cpu !! x}
-        where
-          ucpu = setRegister cpu 0xF (if i cpu > x then 1 else 0)
+        where ucpu = setRegister cpu 0xF (if i cpu > x then 1 else 0)
     (0xF, x, 0x2, 0x9) ->
       incPC $ cpu {i = v cpu !! x * 5}
     (0xF, x, 0x3, 0x3) ->
@@ -150,7 +146,7 @@ executeOpcode cpu opcode =
 
 -- Increments the program counter of a CPU by 2 (one instruction).
 incPC :: CPU -> CPU
-incPC cpu = jumpToAddress cpu (pc cpu + 2)
+incPC cpu = cpu {pc = pc cpu + 2}
 
 -- Jumps to a specific address by setting the program counter to that address.
 jumpToAddress :: CPU -> Int -> CPU
@@ -186,6 +182,16 @@ setRegister cpu idx val = cpu {v = Util.replace idx val (v cpu)}
 -- Sets the memory position at pos to val.
 setMemory :: CPU -> Int -> Int -> CPU
 setMemory cpu pos val = cpu {memory = Util.replace pos val (memory cpu)}
+
+-- Shifts the value of a a register to the left by 1. (v cpu !! idx) << 1
+shiftRegLeft :: CPU -> Int -> CPU
+shiftRegLeft cpu idx = setRegister ucpu idx $ shiftL (v cpu !! idx) 1 `mod` 256
+  where ucpu = setRegister cpu 0xF (shiftR (v cpu !! idx) 7)
+
+-- Shifts the value of a a register to the right by 1. (v cpu !! idx) >> 1
+shiftRegRight :: CPU -> Int -> CPU
+shiftRegRight cpu idx = setRegister ucpu idx (shiftR (v cpu !! idx) 1)
+  where ucpu = setRegister cpu 0xF ((v cpu !! idx) .&. 1)
 
 {- storeBCDRepresentation cpu idx
    Stores the binary-coded decimal representation of the number in (v cpu) to memory.

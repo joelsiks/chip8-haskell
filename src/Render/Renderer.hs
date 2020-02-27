@@ -1,9 +1,10 @@
-module Render.Renderer (DisplaySettings(..), startRenderer) where
+module Render.Renderer (DisplaySettings(..), startRenderer, getScreenSize) where
 
 import CPU.CPU
 import Graphics.Gloss
 import Graphics.Gloss.Data.ViewPort
 import Graphics.Gloss.Interface.IO.Game
+import Graphics.Gloss.Interface.Environment (getScreenSize)
 import Data.Word
 import Data.ByteString (ByteString, pack) -- Same as a bitmap
 
@@ -16,7 +17,6 @@ data DisplaySettings = Settings
     {
         size       :: (Int, Int),
         name       :: String,
-        background :: Color,
         fps        :: Int
     } deriving (Show)
 
@@ -70,4 +70,4 @@ handleKeys _ _ game = game
                   Calls hFunc everytime a key is pressed
 -}
 startRenderer :: DisplaySettings -> CPU -> (CPU -> [Int]) -> (Char -> Bool -> CPU -> CPU) -> (Float -> CPU -> CPU) -> IO()
-startRenderer s gS rF hF uF = play FullScreen (background s) (fps s) gS (renderer s rF) (handleKeys hF) uF 
+startRenderer s gS rF hF uF = play FullScreen black (fps s) gS (renderer s rF) (handleKeys hF) uF 

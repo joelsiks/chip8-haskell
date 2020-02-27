@@ -4,28 +4,24 @@ import CPU.CPU as CPU
 import CPU.LoadRom as LoadRom
 import CPU.Emulate as Emulate
 import qualified CPU.Utility as Util
-import Render.Renderer
-import Graphics.Gloss (blue)
-import Graphics.Gloss.Interface.Environment (getScreenSize)
+import Render.Renderer as Render
+import Client.CliAsk as Client
 import System.Random
 
 main :: IO ()
 main = do
-  let ghciTestPath = "../roms/TEST_OPCODES"
-  let cabalRunTestPath = "roms/TEST_OPCODES"
-  rom <- LoadRom.readRom cabalRunTestPath
-  let cpu = CPU.initCPU rom (mkStdGen 0)
-    -- bätre slumpgenerering
-  --putStrLn "Hello, World!"
+  path <- getFilePath True -- True -> GHCi, False -> Cabal
+  rom <- LoadRom.readRom path
   size <- getScreenSize 
-  let displaySettings = Settings size "Test" blue 60
+  let displaySettings  = Settings size "Chip-8" 60
+  let cpu = CPU.initCPU rom (mkStdGen 0)
   startRenderer displaySettings cpu onRender onInput onUpdate
 
 -- Called last every frame
 onRender :: CPU -> [Int]
 onRender cpu = concat (vram cpu)
 
--- Celled on input
+-- Called on input
 onInput :: Char -> Bool -> CPU -> CPU
 onInput key isDown cpu = cpu {keyboard = setKey key isDown (keyboard cpu)}
   where

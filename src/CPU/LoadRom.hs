@@ -3,8 +3,6 @@ module CPU.LoadRom where
 import System.IO
 import qualified Data.ByteString as B
 
-path = "../../roms/PONG"
-
 {- readRom path
      Reads a file byte by byte and converts them to integers
 

@@ -8,15 +8,23 @@ import System.Random
 windowHeight = 32
 windowWidth  = 64
 
+
 {- Represents a centralised state for the CPU of the CHIP-8.
    The CHIP-8's state is the inner workings of the computer. It holds all the necessary data
    that it needs to have in order to execute any instructions and to interpret any data.
 
-   INVARIANT: 0 <= pc <= 4095
-              0 <= sp <= 15
+   INVARIANT: 0 <= pc < 2^12
+              0 <= sp < 16^1
+              0 <= i  < 2^16
               sound_timer >= 0
               delay_timer >= 0
+              Every number in v is 8-bit.
+              Every number in memory is 8-bit.
+              Every number in stack is 16-bit.
 -}
+-- The design for the CPU is largely based on the version described in the wikipedia
+-- article regarding the CHIP-8.
+-- https://en.wikipedia.org/wiki/CHIP-8#Virtual_machine_description
 data CPU = Cpu { v :: [Int]             -- 16 V Registers with 8-bit registrars. Index 0, 1, 2 ... E, F.
                , i :: Int               -- 16 bit register for memory address.
                , sound_timer :: Int     
@@ -48,12 +56,11 @@ initCPU rom randomgen = Cpu { v = replicate 16 0
                             , rgen = randomgen
                             }
 
-setDefaultKeyboard :: CPU -> CPU
-setDefaultKeyboard cpu = cpu {keyboard = defaultKeyboard}
-
+-- Returns a blank keyboard state.
 defaultKeyboard :: [Bool]
 defaultKeyboard = replicate 16 False
 
+-- Returns a blank VRAM state.
 defaultVRAM :: [[Int]]
 defaultVRAM = replicate windowHeight (replicate windowWidth 0)
 

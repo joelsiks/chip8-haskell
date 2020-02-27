@@ -30,7 +30,11 @@ executable chip8-pkd
                        lens       >=4.0.0,
                        random     >=1.0,
                        HUnit      >=1.0.0.0,
+<<<<<<< HEAD
                        directory  >=1.0
 
+=======
+                       time       >= 1.8.0.2
+>>>>>>> 08bc86db7f9a2c5786598807196602ad8ccd45f9
   hs-source-dirs:      src
   default-language:    Haskell2010

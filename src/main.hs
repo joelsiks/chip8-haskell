@@ -2,40 +2,23 @@ module Main where
 
 import CPU.CPU as CPU
 import CPU.LoadRom as LoadRom
-<<<<<<< HEAD
-import CPU.Emulate as Emulate
-import qualified CPU.Utility as Util
 import Render.Renderer as Render
 import Client.CliAsk as Client
-=======
 import CPU.Emulate as Emulate (emulateCycle)
 import CPU.Utility as Util (replace)
-import Render.Renderer
 import Graphics.Gloss (blue)
 import Graphics.Gloss.Interface.Environment (getScreenSize)
->>>>>>> 08bc86db7f9a2c5786598807196602ad8ccd45f9
 import System.Random
 import Data.Time.Clock.POSIX
 
 main :: IO ()
 main = do
-<<<<<<< HEAD
-  path <- getFilePath True -- True -> GHCi, False -> Cabal
-  rom <- LoadRom.readRom path
-  size <- getScreenSize 
-  let displaySettings  = Settings size "Chip-8" 60
-  let cpu = CPU.initCPU rom (mkStdGen 0)
-=======
-  let ghciTestPath = "../roms/HIDDEN"
-  let cabalRunTestPath = "roms/HIDDEN"
-  rom <- LoadRom.readRom cabalRunTestPath
-
+  path    <- getFilePath True     -- False -> GHCi, True -> Cabal
+  rom     <- LoadRom.readRom path
+  size    <- getScreenSize
   rndSeed <- fmap round getPOSIXTime
+  let displaySettings  = Settings size "Chip-8" 60
   let cpu = CPU.initCPU rom (mkStdGen rndSeed)
-
-  size <- getScreenSize 
-  let displaySettings = Settings size "Test" blue 100
->>>>>>> 08bc86db7f9a2c5786598807196602ad8ccd45f9
   startRenderer displaySettings cpu onRender onInput onUpdate
 
 -- Called last every frame

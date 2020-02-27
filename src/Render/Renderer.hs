@@ -36,7 +36,6 @@ createFrame pixels = bitmapOfByteString 64 32 (BitmapFormat (TopToBottom) (PxRGB
         f 1 = [255,255,255,255]
         f _ = [0,0,0,255]
 
-
 {-  renderer settings func cpu
     Applies createFrame to the pixels created from applying func to cpu
 

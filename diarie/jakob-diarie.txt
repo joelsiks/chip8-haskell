@@ -27,7 +27,7 @@
 - Implementerade skalning av bilden så att emulatorn nu körs i fullscreen
 - Skrev delar av dokumentationen (nämnligen om vad en emulator är samt vad chip-8 är)
 
-27/02 10:00 - 18:00
+27/02 10:00 - 19:45
 - Skrev dokumentationen av renderer och annat
 - Implementerade CliAsk modulen som tillåter spelaren att välja spel
 - Skrev dokumentationen till CliAsk modulen

@@ -108,7 +108,7 @@ executeOpcode cpu opcode =
       incPC $ setRegister ucpu x (v cpu !! y - v cpu !! x)
         where ucpu = setRegister cpu 0xF (if v cpu !! y > v cpu !! x then 1 else 0)
     (0x8, x, y, 0xE) ->
-      incPC $ setRegister ucpu x (shiftL (v cpu !! x) 1)
+      incPC $ setRegister ucpu x ((shiftL (v cpu !! x) 1) `mod` 256)
         where ucpu = setRegister cpu 0xF (shiftR (v cpu !! x) 7)
     (0x9, x, y, 0x0) ->
       incPC $ skipInstructionIf cpu ((v cpu !! x) /= (v cpu !! y))

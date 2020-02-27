@@ -4,7 +4,7 @@ import CPU.CPU as CPU
 import CPU.Emulate as Emulate
 import CPU.Utility as Util
 import CPU.LoadRom as LoadRom
-import Data.Bits ((.&.))
+import Data.Bits ((.&.), shiftL, shiftR)
 import System.Random (mkStdGen, randomR)
 
 standardGen = mkStdGen 0
@@ -17,20 +17,17 @@ blankCPU = initCPU [0] standardGen
 -- Timers should always be >= 0
 testICPU1 =
   let cpu = CPU.initCPU [1,2,3] (mkStdGen 0)
-  in
-    TestCase $ assertBool "initCPU [1,2,3] (mkStdGen 0)" (sound_timer cpu >= 0 && delay_timer cpu >= 0)
+  in TestCase $ assertBool "initCPU [1,2,3] (mkStdGen 0)" (sound_timer cpu >= 0 && delay_timer cpu >= 0)
 
 -- Memory size is constant
 testICPU2 =
   let cpu = CPU.initCPU [1,2,3] (mkStdGen 0)
-  in
-    TestCase $ assertEqual "initCPU [1,2,3] (mkStdGen 0)" 4096 (length (memory cpu))
+  in TestCase $ assertEqual "initCPU [1,2,3] (mkStdGen 0)" 4096 (length (memory cpu))
 
 -- Vram should be blank and a constant size of 64*32
 testICPU3 =
   let cpu = CPU.initCPU [1,2,3] (mkStdGen 0)
-  in
-    TestCase $ assertEqual "initCPU [1,2,3] (mkStdGen 0)" (replicate (64*32) 0) (concat (vram cpu))
+  in TestCase $ assertEqual "initCPU [1,2,3] (mkStdGen 0)" (replicate (64*32) 0) (concat (vram cpu))
 
 
 -- initMemory
@@ -60,18 +57,14 @@ romTests = TestList [testCR1, testCR2]
 -- Utility tests
 
 -- splitByte
-testSB1 = TestCase $ assertEqual "splitByte 0xAF" 
-              (0xA, 0xF) (Util.splitByte 0xAF)
+testSB1 = TestCase $ assertEqual "splitByte 0xAF" (0xA, 0xF) (Util.splitByte 0xAF)
 
-testSB2 = TestCase $ assertEqual "splitByte 0x13" 
-              (0x1, 0x3) (Util.splitByte 0x13)
+testSB2 = TestCase $ assertEqual "splitByte 0x13" (0x1, 0x3) (Util.splitByte 0x13)
 
-testSB3 = TestCase $ assertEqual "splitByte 0x0"  
-              (0, 0) (Util.splitByte 0x0)
+testSB3 = TestCase $ assertEqual "splitByte 0x0"  (0, 0) (Util.splitByte 0x0)
 
 -- replace
-testREP1 = TestCase $ assertEqual "replace 0 0 [1..4]" 
-               [0,2,3,4] (Util.replace 0 0 [1..4])
+testREP1 = TestCase $ assertEqual "replace 0 0 [1..4]" [0,2,3,4] (Util.replace 0 0 [1..4])
 
 -- nestedListIndexes
 testNLI1 = TestCase $ assertEqual "nestedListIndexes 1 1" 
@@ -199,11 +192,55 @@ testRandVal =
     TestCase $ assertEqual ("generateRandomValue blankCPU " ++ show index ++ " " ++ show andVal)
       (v ucpu !! index) (randVal .&. andVal)
 
-        
+-- checkIfInput
+testCheckInput1 =
+  let
+    keyIndex = 0x3
+    regIndex = 0x6
+    ucpu = blankCPU {keyboard = Util.replace keyIndex True CPU.defaultKeyboard}
+  in
+    TestCase $ assertEqual ("checkIfInput (cpu where keyboard index " ++ show keyIndex ++ " set to True) " ++ show regIndex)
+      (v (checkIfInput ucpu regIndex) !! regIndex) keyIndex
+
+testCheckInput2 = TestCase $ assertEqual "checkIfInput (cpu where every key set to False) 0x0"
+                      (keyboard (checkIfInput blankCPU 0x0)) defaultKeyboard
+
+-- shiftRegLeft
+testShiftLeft =
+  let
+    regIndex = 0x4
+    n1 = 224
+    n2 = 20
+    ucpu1 = setRegister blankCPU regIndex n1
+    ucpu2 = setRegister blankCPU regIndex n2
+  in
+    TestList [
+      TestCase $ assertEqual ("shiftRegLeft (cpu where (v cpu !! " ++ show regIndex ++ ") = " ++ show n1 ++ ") " ++ show regIndex)
+        (v (shiftRegLeft ucpu1 regIndex) !! regIndex) 192
+    , TestCase $ assertEqual ("shiftRegLeft (cpu where (v cpu !! " ++ show regIndex ++ ") = " ++ show n2 ++ ") " ++ show regIndex)
+        (v (shiftRegLeft ucpu2 regIndex) !! regIndex) 40
+    ]
+
+-- shiftRegRight
+testShiftRight =
+  let
+    regIndex = 0x4
+    n1 = 224
+    n2 = 20
+    ucpu1 = setRegister blankCPU regIndex n1
+    ucpu2 = setRegister blankCPU regIndex n2
+  in
+    TestList [
+      TestCase $ assertEqual ("shiftRegRight (cpu where (v cpu !! " ++ show regIndex ++ ") = " ++ show n1 ++ ") " ++ show regIndex)
+        (v (shiftRegRight ucpu1 regIndex) !! regIndex) 112
+    , TestCase $ assertEqual ("shiftRegRight (cpu where (v cpu !! " ++ show regIndex ++ ") = " ++ show n2 ++ ") " ++ show regIndex)
+        (v (shiftRegRight ucpu2 regIndex) !! regIndex) 10
+    ]
 
 emulateTests = TestList [ testOPNNN, testOPNN, testFOp1, testIncPC, testJump, testInsertStack, testRetSub
                         , testSkipIf1, testSkipIf2, testSetReg, testSetMem, testStoreBCD, testStoreReg
-                        , testLoadReg, testRandVal
+                        , testLoadReg, testRandVal, testCheckInput1, testCheckInput2, testShiftLeft
+                        , testShiftRight
                         ]
 
 -------------------------------- 

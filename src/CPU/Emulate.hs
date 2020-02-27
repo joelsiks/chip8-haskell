@@ -235,8 +235,9 @@ generateRandomValue cpu idx andVal =
     ucpu = cpu {rgen = newStdGen}
   in setRegister ucpu idx (randomValue .&. andVal)
 
--- Checks if any keys are pressed, if any are, set register reg to the index of the first key pressed.
 {- checkIfInput cpu regIndex
+   Checks if any keys are pressed and if so sets a register to the index of the first
+   pressed key.
 
    PRE: regIndex is a single number in base16
    RETURNS: unaltered cpu if there are no registered keys, otherwise cpu where (v cpu) !! regIndex

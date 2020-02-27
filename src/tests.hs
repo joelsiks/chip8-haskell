@@ -215,8 +215,10 @@ testShiftLeft =
     ucpu2 = setRegister blankCPU regIndex n2
   in
     TestList [
+      -- Tests if 8-bit overflow "wraps" around correctly. 
       TestCase $ assertEqual ("shiftRegLeft (cpu where (v cpu !! " ++ show regIndex ++ ") = " ++ show n1 ++ ") " ++ show regIndex)
         (v (shiftRegLeft ucpu1 regIndex) !! regIndex) 192
+      -- Tests normal use case.
     , TestCase $ assertEqual ("shiftRegLeft (cpu where (v cpu !! " ++ show regIndex ++ ") = " ++ show n2 ++ ") " ++ show regIndex)
         (v (shiftRegLeft ucpu2 regIndex) !! regIndex) 40
     ]

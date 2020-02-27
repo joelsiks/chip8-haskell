@@ -81,3 +81,17 @@ Lagt till fulla specifikationer för funktioner i Emulate.hs där funktionerna a
 signifikant komplexitet. Har även ändrat i många funktioner där parenteser kan tas bort och
 där man kan ersätta med enklare implementationer.
 
+27/02 10:00-12:00
+
+Fixat ännu ett par buggar relaterade till operationer med 8-bitars värden som ger resultat som 
+är större än (2^8 - 1).
+
+Implementerat funktionerna shiftRegLeft & shiftRegRight och implementerat testfall för dem samt
+testfall för checkIfInput.
+
+Lagt till funktionalitet för "pseudo-true-randomness" där random seeden plockas från datorns
+UNIX-timestamp.
+
+27/02 17:30-19:00
+
+Skrivit på dokumentationen. Fokuserat främst på "Use cases" och "Introduction" avsnitten.

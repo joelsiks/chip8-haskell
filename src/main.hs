@@ -20,11 +20,7 @@ main = do
   rndSeed    <- fmap round getPOSIXTime
   let displaySettings  = Settings size fps
   let cpu = CPU.initCPU rom (mkStdGen rndSeed)
-  startRenderer displaySettings cpu onRender onInput onUpdate
-
--- Called last every frame
-onRender :: CPU -> [Int]
-onRender cpu = concat (vram cpu)
+  startRenderer displaySettings cpu onInput onUpdate
 
 -- Called on input
 onInput :: Char -> Bool -> CPU -> CPU

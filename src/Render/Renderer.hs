@@ -1,6 +1,6 @@
 module Render.Renderer (DisplaySettings(..), startRenderer, getScreenSize) where
 
-import CPU.CPU (CPU)
+import CPU.CPU (CPU, isRunning, startCPU)
 import Graphics.Gloss
 import Graphics.Gloss.Data.ViewPort
 import Graphics.Gloss.Interface.IO.Game
@@ -45,7 +45,9 @@ createFrame pixels = bitmapOfByteString 64 32 (BitmapFormat (TopToBottom) (PxRGB
     INVARIANT: Called in the internal loop from gloss.play
 -}
 renderer :: DisplaySettings -> (CPU -> [Int]) -> CPU -> Picture
-renderer s f state = scale (x/64) (y/32) $ createFrame $ f state
+renderer s f cpu
+    | (not $ isRunning cpu) = scale (x/64) (y/32) $ createFrame (replicate (64*32) 1)
+    | otherwise             = scale (x/64) (y/32) $ createFrame $ f cpu
     where
         (a,b) = (size s)
         (x,y) = (realToFrac a, realToFrac b)
@@ -56,10 +58,14 @@ renderer s f state = scale (x/64) (y/32) $ createFrame $ f state
     INVARIANT: Called in the internal loop from gloss.play
 -}
 handleKeys :: (Char -> Bool -> CPU -> CPU) -> Event -> CPU -> CPU
-handleKeys f (EventKey (Char key) Down _ _) game = f key True game
-handleKeys f (EventKey (Char key) Up   _ _) game = f key False game
-handleKeys _ _ game                              = game
-
+handleKeys f (EventKey a s _ _) cpu
+    | (not $ isRunning cpu) = startCPU cpu
+    | otherwise             = handleKeys' f (a,s) cpu
+    where
+        handleKeys' f ((Char key), Down) cpu = f key True  cpu
+        handleKeys' f ((Char key),   Up) cpu = f key False cpu
+        handleKeys' _ _ cpu                              = cpu
+handleKeys _ _ cpu = cpu
 {-  startRenderer settings cpu rFunc hFunc uFunc
     Starts a game
     PRE: cpu is in a functional state,
@@ -71,4 +77,4 @@ handleKeys _ _ game                              = game
                   Calls hFunc everytime a key is pressed
 -}
 startRenderer :: DisplaySettings -> CPU -> (CPU -> [Int]) -> (Char -> Bool -> CPU -> CPU) -> (Float -> CPU -> CPU) -> IO()
-startRenderer s gS rF hF uF = play FullScreen black (fps s) gS (renderer s rF) (handleKeys hF) uF
+startRenderer s gS rF hF uF = play FullScreen white (fps s) gS (renderer s rF) (handleKeys hF) uF

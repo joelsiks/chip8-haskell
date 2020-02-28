@@ -38,3 +38,18 @@ Funktionspecifikation för funktioner.
 2020-02-25 14:30-15:40
 
 Implementation av testfall för initilisationsfunktionerna + rominlänsingsfunktionerna.
+
+2020-02-26 10:00-13:00
+
+Arbete i gruppen:
+	Grafik kopplades ihop med resten av programet.
+	Tangetbordsinläsningar kopplades ihop.
+	Felsökning och optimisiering av olika funktioner.
+	Lunch.
+	Rapportskrivande.
+
+2020-02-27 14:00-15:00
+	Rapportskrivande. Layout och tidig version. 
+
+2020-02-27 17:00-18:30
+	Rapportskrivande. CPU specifikation och funktionsbeskrivning

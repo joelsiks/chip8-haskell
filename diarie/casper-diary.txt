@@ -63,3 +63,6 @@ Arbete i gruppen:
 
 2020-02-28 16:00-16:45
 	Rapportskrivande.
+
+2020-02-28 18:45-19:30
+	Testfall för cyckel + CPU flagga 

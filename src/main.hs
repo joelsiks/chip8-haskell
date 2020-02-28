@@ -14,11 +14,11 @@ import Data.Time.Clock.POSIX
 
 main :: IO ()
 main = do
-  path    <- getFilePath True -- False -> GHCi, True -> Cabal
-  rom     <- LoadRom.readRom path
-  size    <- getScreenSize
-  rndSeed <- fmap round getPOSIXTime
-  let displaySettings  = Settings size 60
+  (path,fps) <- getRomInfo True -- False -> GHCi, True -> Cabal
+  rom        <- LoadRom.readRom path
+  size       <- getScreenSize
+  rndSeed    <- fmap round getPOSIXTime
+  let displaySettings  = Settings size fps
   let cpu = CPU.initCPU rom (mkStdGen rndSeed)
   startRenderer displaySettings cpu onRender onInput onUpdate
 
@@ -51,4 +51,6 @@ onInput key isDown cpu = cpu {keyboard = setKey key isDown (keyboard cpu)}
 
 -- Called every frame before onRenderer
 onUpdate :: Float -> CPU -> CPU
-onUpdate _ cpu = Emulate.emulateCycle cpu
+onUpdate _ cpu
+  | (isRunning cpu) = Emulate.emulateCycle cpu
+  | otherwise       = cpu

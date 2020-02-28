@@ -23,7 +23,7 @@ executable chip8-pkd
                        CPU.Utility
                        Render.Renderer
                        Render.Splash
-                       Client.CliAsk
+                       CLI.CliAsk
   -- other-extensions:
   build-depends:       base       ^>=4.12.0.0,
                        gloss      >=1.13.1.1,

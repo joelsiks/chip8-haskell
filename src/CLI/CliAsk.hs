@@ -1,5 +1,5 @@
 
-module Client.CliAsk (getRomInfo) where
+module CLI.CliAsk (getRomInfo) where
 
 import Data.Char
 import System.Directory

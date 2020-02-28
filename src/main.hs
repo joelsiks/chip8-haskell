@@ -4,7 +4,7 @@ module Main where
 import CPU.CPU as CPU
 import CPU.LoadRom as LoadRom
 import Render.Renderer as Render
-import Client.CliAsk as Client
+import CLI.CliAsk as CLI
 import CPU.Emulate as Emulate (emulateCycle)
 import CPU.Utility as Util (replace)
 import Graphics.Gloss (blue)
@@ -14,7 +14,7 @@ import Data.Time.Clock.POSIX
 
 main :: IO ()
 main = do
-  (path,fps) <- getRomInfo True -- False -> GHCi, True -> Cabal
+  (path,fps) <- CLI.getRomInfo True -- False -> GHCi, True -> Cabal
   rom        <- LoadRom.readRom path
   size       <- getScreenSize
   rndSeed    <- fmap round getPOSIXTime

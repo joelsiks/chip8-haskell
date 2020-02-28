@@ -144,7 +144,7 @@ executeOpcode cpu opcode =
     --       opcode that doesn't execute could lead to undefined behaviour.
     _ -> cpu
 
--- Increments the program counter of a CPU by 2 (one instruction).
+-- Increments the program counter by 2 (one instruction).
 incPC :: CPU -> CPU
 incPC cpu = cpu {pc = pc cpu + 2}
 
@@ -152,7 +152,7 @@ incPC cpu = cpu {pc = pc cpu + 2}
 jumpToAddress :: CPU -> Int -> CPU
 jumpToAddress cpu addr = cpu {pc = addr}
 
--- Skips instruction if pred is True, otherwise return the same state.
+-- Skips the next instruction if pred is True, otherwise return the same state.
 skipInstructionIf :: CPU -> Bool -> CPU
 skipInstructionIf cpu pred | pred      = incPC cpu
                            | otherwise = cpu
@@ -194,7 +194,7 @@ shiftRegRight cpu idx = setRegister ucpu idx (shiftR (v cpu !! idx) 1)
   where ucpu = setRegister cpu 0xF ((v cpu !! idx) .&. 1)
 
 {- storeBCDRepresentation cpu idx
-   Stores the binary-coded decimal representation of the number in (v cpu) to memory.
+   Stores the binary-coded decimal representation of a number in the stack to memory.
 
    PRE: idx is a single number in base16
    RETURNS: cpu where the number in (v cpu !! idx) has been offloaded to the memory starting at position (i cpu)
@@ -221,7 +221,7 @@ loadRegisters cpu idx | idx == 0  = ucpu
                         where ucpu = setRegister cpu idx (memory cpu !! (i cpu + idx))
 
 {- generateRandomValue cpu idx andVal
-   Sets a register in a CPU to a random value.
+   Sets a register to a random value.
 
    PRE: andVal > 0, idx is a single number in base16
    RETURNS: cpu where (v cpu !! idx) has been set to ((a random number) .&. andVal)

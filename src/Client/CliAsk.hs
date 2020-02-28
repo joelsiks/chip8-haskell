@@ -1,45 +1,55 @@
 
-module Client.CliAsk (getFilePath) where
+module Client.CliAsk (getRomInfo) where
 
 import System.Directory
 import System.Environment
 import System.IO
 
-{-  getFilePath usingCabal
+{-  getRomInfo usingCabal
     asks the user to chose a game found in the specified path and fetches the relative path to that game
 
     PRE: there are files in "roms" folder
     RETURNS: The relative path to a game
-    Examples: getFilePath False (Input TANK) == "../roms/TANK"
-              getFilePath True (Input TANK)  == "roms/TANK"
+    Examples: getRomInfo False (Input TANK) == "../roms/TANK"
+              getRomInfo True (Input TANK)  == "roms/TANK"
 -}
-getFilePath :: Bool -> IO String
-getFilePath iscabal = do
+getRomInfo :: Bool -> IO (String, Int)
+getRomInfo iscabal = do
     let pathStart = if iscabal then "roms/" else "../roms/"
     options <- listDirectory pathStart
-    askForFile pathStart options
+    game <- askForFile options
+    return (pathStart ++ game, getFPS game)
 
 {-  askForFile path options
     repeatedly asks the user to chose one of the games of the given options and repeats the question if input is invalid.
-    returns the chosen games relative path.
+    returns the chosen games relative path and fps.
 
     PRE: options is not empty, path exists
-    RETURNS: The relative path to a game
-    Examples: getFilePath "../roms/" (Input TANK) == "../roms/TANK"
+    RETURNS: The relative path to a game and game specific fps
+    Examples: askForFile [TANK,PONG] (Input TANK) == "TANK"
 -}
-askForFile :: String -> [String] -> IO String
-askForFile pathStart options = do
+askForFile :: [String] -> IO String
+askForFile options = do
     putStrLn $ "Available games: " ++ buildString options
     putStr "Type in the ROM you would like to launch: "
     hFlush stdout
     str <- getLine
 
     if str `elem` options
-    then return $ pathStart ++ str
+    then return str
     else do
         putStrLn "Invalid input. Try again!\n"
-        askForFile pathStart options
+        askForFile options
 
+getFPS :: String -> Int
+getFPS key = findInList key list
+    where
+        list = [("PONG",60)]
+        findInList :: String -> [(String, Int)] -> Int
+        findInList str ((key,fps):xs)
+            | str == key = fps
+            | otherwise  = findInList str xs
+        findInList _ _   = 100
 
 {-  buildString list
     formats a list into a nice looking text

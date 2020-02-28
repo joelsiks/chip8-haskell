@@ -4,11 +4,14 @@ import CPU.CPU as CPU
 import CPU.Emulate as Emulate
 import CPU.Utility as Util
 import CPU.LoadRom as LoadRom
+import Render.Renderer as Renderer
+import CLI.CliAsk as CliAsk
 import Data.Bits ((.&.), shiftL, shiftR)
 import System.Random (mkStdGen, randomR)
+import Graphics.Gloss.Interface.IO.Game (Key(Char), KeyState(..), Event(..), Modifiers(..))
 
 standardGen = mkStdGen 0
-blankCPU = initCPU [0] standardGen
+blankCPU = (initCPU [0] standardGen) {isRunning = True}
 
 -------------------------------- 
 -- CPU Tests
@@ -197,13 +200,13 @@ testCheckInput1 =
   let
     keyIndex = 0x3
     regIndex = 0x6
-    ucpu = blankCPU {keyboard = Util.replace keyIndex True CPU.defaultKeyboard}
+    ucpu = blankCPU {keyboard = Util.replace keyIndex True (replicate 16 False)}
   in
     TestCase $ assertEqual ("checkIfInput (cpu where keyboard index " ++ show keyIndex ++ " set to True) " ++ show regIndex)
       (v (checkIfInput ucpu regIndex) !! regIndex) keyIndex
 
 testCheckInput2 = TestCase $ assertEqual "checkIfInput (cpu where every key set to False) 0x0"
-                      (keyboard (checkIfInput blankCPU 0x0)) defaultKeyboard
+                      (keyboard (checkIfInput blankCPU 0x0)) (replicate 16 False)
 
 -- shiftRegLeft
 testShiftLeft =
@@ -239,10 +242,32 @@ testShiftRight =
         (v (shiftRegRight ucpu2 regIndex) !! regIndex) 10
     ]
 
+-------------------------------- 
+-- Renderer Tests
+
+-- handleKeys
+testHandleKeys = TestCase $ assertEqual ("handleKeys where q is pressed") (keyboard (handleKeys onInput event blankCPU)) (Util.replace 4 True (replicate 16 False))
+  where
+    event = EventKey (Char 'q') Down (Modifiers Down Down Down) (0, 0)
+
+    -- TODO Implement from main
+    onInput :: Char -> Bool -> CPU -> CPU
+    onInput _ _ c = c {keyboard = (Util.replace 4 True (keyboard c))} 
+
+-------------------------------- 
+-- CliAsk Tests
+
+-- getFPS
+testGetFPS = TestCase $ assertEqual "getFPS for PONG" (getFPS "PONG") 60
+
+-- buildString
+testBuildString = TestCase $ assertEqual "buildString for [jag,hello,str]" (buildString ["jag","hello","str"]) "jag, hello, str"
+
+-------------------------------- 
 emulateTests = TestList [ testOPNNN, testOPNN, testFOp1, testIncPC, testJump, testInsertStack, testRetSub
                         , testSkipIf1, testSkipIf2, testSetReg, testSetMem, testStoreBCD, testStoreReg
                         , testLoadReg, testRandVal, testCheckInput1, testCheckInput2, testShiftLeft
-                        , testShiftRight
+                        , testShiftRight, testHandleKeys, testGetFPS, testBuildString
                         ]
 
 -------------------------------- 

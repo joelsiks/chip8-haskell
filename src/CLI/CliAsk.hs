@@ -1,5 +1,5 @@
 
-module Client.CliAsk (getRomInfo) where
+module CLI.CliAsk where
 
 import Data.Char
 import System.Directory
@@ -11,6 +11,8 @@ import System.IO
 
     PRE: there are files in "roms" folder
     RETURNS: The relative path to a game
+    SIDE EFFECTS: lists all files found in path, 
+                 exception thrown if "roms" folder does not exist
     Examples: getRomInfo False (Input TANK) == "../roms/TANK"
               getRomInfo True (Input TANK)  == "roms/TANK"
 -}
@@ -18,7 +20,7 @@ getRomInfo :: Bool -> IO (String, Int)
 getRomInfo iscabal = do
     let pathStart = if iscabal then "roms/" else "../roms/"
     options <- listDirectory pathStart
-    game <- askForFile options
+    game    <- askForFile options
     return (pathStart ++ game, getFPS game)
 
 {-  askForFile path options
@@ -27,6 +29,8 @@ getRomInfo iscabal = do
 
     PRE: options is not empty, path exists
     RETURNS: The relative path to a game and game specific fps
+    SIDE EFFECTS: prints prompts in the terminal,
+                  reads inputs from terminal.
     Examples: askForFile [TANK,PONG] (Input TANK) == "TANK"
 -}
 askForFile :: [String] -> IO String
@@ -43,12 +47,19 @@ askForFile options = do
         putStrLn "Invalid input. Try again!\n"
         askForFile options
 
+{-  getFPS name
+    gets the predefiend fps for a rom with the given name or 100
+
+    RETURNS: returns the relative fps to name or 100
+    EXAMPLES: getFPS "PONG" == 60
+              getFPS "X"    == 100
+-}
 getFPS :: String -> Int
 getFPS key = findInList key list
     where
         list = [("15PUZZLE",320),("BLINKY",600),("CONNECT4",50),("HIDDEN", 80),("KALEID",600),("MAZE",300),("PONG",300),("TETRIS",120),("TICTAC",80),("VERS",120)]
-
         findInList :: String -> [(String, Int)] -> Int
+        -- VARIANT: length list
         findInList str ((key,fps):xs)
             | str == key = fps
             | otherwise  = findInList str xs

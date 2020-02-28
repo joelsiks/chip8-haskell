@@ -32,6 +32,10 @@ testICPU3 =
   let cpu = CPU.initCPU [1,2,3] (mkStdGen 0)
   in TestCase $ assertEqual "initCPU [1,2,3] (mkStdGen 0)" (replicate (64*32) 0) (concat (vram cpu))
 
+-- Check that running flag is set correctly
+testSCPU =
+  let cpu = CPU.initCPU [1,2,3] (mkStdGen 0)
+  in TestCase $ assertEqual "startCPU cpu" True (isRunning (CPU.startCPU cpu))
 
 -- initMemory
 -- Check that memory is the correct size
@@ -45,7 +49,7 @@ testIM3 = TestCase $ assertEqual "initMemory [0xA,0xB,0xC]" 0xB (CPU.initMemory 
 -- Program with padding should be constant size 
 testPR = TestCase $ assertEqual "padRom [1]" 3584 (length (CPU.padRom [1]))
 
-cpuTests = TestList [testICPU1, testICPU2, testICPU3, testIM1, testIM2, testIM3, testPR]
+cpuTests = TestList [testICPU1, testICPU2, testICPU3, testSCPU, testIM1, testIM2, testIM3, testPR]
 
 --------------------------------
 -- Rom Tests
@@ -77,6 +81,17 @@ utilityTests = TestList [testSB1, testSB2, testSB3, testREP1, testNLI1]
 
 -------------------------------- 
 -- Emulate Tests
+
+-- Tests that value is stored and timer is decresed
+testCycle = 
+  let cpu = Emulate.emulateCycle (CPU.initCPU [0x6A,0x02] (mkStdGen 0)) {delay_timer = 9}
+  in TestCase $ assertBool "initCPU [0x6A,0x02] (mkStdGen 0)" (v cpu !! 0xA == 2 && delay_timer cpu == 8)
+
+-- Sound timer should be decresed but not delay_timer
+testTimers =
+  let cpu = decreseTimers $ CPU.initCPU [1,2,3] (mkStdGen 0)
+      cpu2 = decreseTimers $ cpu {sound_timer = 7, delay_timer = 0}
+  in TestCase $ assertBool "decreseTimers cpu" (sound_timer cpu2 == 6 && delay_timer cpu2 == 0)
 
 -- fetchOpcode
 -- Fetching a "fake" opcode from the start of the memory where the fontset is located should always yield the same result.
@@ -258,13 +273,13 @@ testHandleKeys = TestCase $ assertEqual ("handleKeys where q is pressed") (keybo
 -- CliAsk Tests
 
 -- getFPS
-testGetFPS = TestCase $ assertEqual "getFPS for PONG" (getFPS "PONG") 60
+testGetFPS = TestCase $ assertEqual "getFPS for PONG" (getFPS "PONG") 300
 
 -- buildString
 testBuildString = TestCase $ assertEqual "buildString for [jag,hello,str]" (buildString ["jag","hello","str"]) "jag, hello, str"
 
 -------------------------------- 
-emulateTests = TestList [ testOPNNN, testOPNN, testFOp1, testIncPC, testJump, testInsertStack, testRetSub
+emulateTests = TestList [ testCycle, testTimers, testOPNNN, testOPNN, testFOp1, testIncPC, testJump, testInsertStack, testRetSub
                         , testSkipIf1, testSkipIf2, testSetReg, testSetMem, testStoreBCD, testStoreReg
                         , testLoadReg, testRandVal, testCheckInput1, testCheckInput2, testShiftLeft
                         , testShiftRight, testHandleKeys, testGetFPS, testBuildString

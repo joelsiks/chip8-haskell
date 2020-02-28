@@ -37,6 +37,7 @@ data CPU = Cpu { v :: [Int]             -- 16 V Registers with 8-bit registrars.
                , vram_changed :: Bool
                , keyboard :: [Bool]     -- List with bools representing if a certain key has been pressed.
                , rgen :: StdGen         -- Random number generator.
+               , isRunning :: Bool      -- Flag if the emulator is running.
                } deriving (Show)
 
 -- Returns a fresh state of the CPU where all of its values has been
@@ -52,13 +53,13 @@ initCPU rom randomgen = Cpu { v = replicate 16 0
                             , sp = 0
                             , vram = defaultVRAM
                             , vram_changed = False
-                            , keyboard = defaultKeyboard
+                            , keyboard = replicate 16 False
                             , rgen = randomgen
+                            , isRunning = False
                             }
 
--- Returns a blank keyboard state.
-defaultKeyboard :: [Bool]
-defaultKeyboard = replicate 16 False
+startCPU :: CPU -> CPU
+startCPU cpu = cpu {isRunning = True}
 
 -- Returns a blank VRAM state.
 defaultVRAM :: [[Int]]

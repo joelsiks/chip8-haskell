@@ -46,7 +46,8 @@ askForFile options = do
 getFPS :: String -> Int
 getFPS key = findInList key list
     where
-        list = [("PONG",60)]
+        list = [("15PUZZLE",320),("BLINKY",600),("CONNECT4",50),("HIDDEN", 80),("KALEID",600),("MAZE",300),("PONG",300),("TETRIS",120),("TICTAC",80),("VERS",120)]
+
         findInList :: String -> [(String, Int)] -> Int
         findInList str ((key,fps):xs)
             | str == key = fps

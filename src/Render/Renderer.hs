@@ -1,6 +1,7 @@
 module Render.Renderer (DisplaySettings(..), startRenderer, getScreenSize) where
 
-import CPU.CPU (CPU, isRunning, startCPU)
+import CPU.CPU (CPU(..), isRunning, startCPU)
+import Render.Splash as Splash
 import Graphics.Gloss
 import Graphics.Gloss.Data.ViewPort
 import Graphics.Gloss.Interface.IO.Game
@@ -36,18 +37,18 @@ createFrame pixels = bitmapOfByteString 64 32 (BitmapFormat (TopToBottom) (PxRGB
         f 1 = [255,255,255,255]
         f _ = [0,0,0,255]
 
-{-  renderer settings func cpu
-    Applies createFrame to the pixels created from applying func to cpu
+{-  renderer settings cpu
+    Creates an image from the vram component of cpu and scales it to fill the screen
 
     PRE: cpu is in a functional state,
          The number of pixels is equal to the number of pixels required for the given screen size
-    RETURNS: A renderer readable picture created from the given pixels
+    RETURNS: A renderer readable picture created from the given cpu
     INVARIANT: Called in the internal loop from gloss.play
 -}
-renderer :: DisplaySettings -> (CPU -> [Int]) -> CPU -> Picture
-renderer s f cpu
-    | (not $ isRunning cpu) = scale (x/64) (y/32) $ createFrame (replicate (64*32) 1)
-    | otherwise             = scale (x/64) (y/32) $ createFrame $ f cpu
+renderer :: DisplaySettings -> CPU -> Picture
+renderer s cpu
+    | (not $ isRunning cpu) = scale (x/64) (y/32) $ createFrame Splash.splash
+    | otherwise             = scale (x/64) (y/32) $ createFrame $ concat (vram cpu)
     where
         (a,b) = (size s)
         (x,y) = (realToFrac a, realToFrac b)
@@ -65,7 +66,8 @@ handleKeys f (EventKey a s _ _) cpu
         handleKeys' f ((Char key), Down) cpu = f key True  cpu
         handleKeys' f ((Char key),   Up) cpu = f key False cpu
         handleKeys' _ _ cpu                              = cpu
-handleKeys _ _ cpu = cpu
+handleKeys _ _ cpu = cpu -- Ignores unwated inputs
+
 {-  startRenderer settings cpu rFunc hFunc uFunc
     Starts a game
     PRE: cpu is in a functional state,
@@ -76,5 +78,5 @@ handleKeys _ _ cpu = cpu
                   Calls uFunc every frame
                   Calls hFunc everytime a key is pressed
 -}
-startRenderer :: DisplaySettings -> CPU -> (CPU -> [Int]) -> (Char -> Bool -> CPU -> CPU) -> (Float -> CPU -> CPU) -> IO()
-startRenderer s gS rF hF uF = play FullScreen white (fps s) gS (renderer s rF) (handleKeys hF) uF
+startRenderer :: DisplaySettings -> CPU -> (Char -> Bool -> CPU -> CPU) -> (Float -> CPU -> CPU) -> IO()
+startRenderer s cpu hF uF = play FullScreen white (fps s) cpu (renderer s) (handleKeys hF) uF

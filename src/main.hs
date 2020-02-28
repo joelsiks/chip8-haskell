@@ -1,3 +1,4 @@
+
 module Main where
 
 import CPU.CPU as CPU
@@ -13,11 +14,11 @@ import Data.Time.Clock.POSIX
 
 main :: IO ()
 main = do
-  path    <- getFilePath True     -- False -> GHCi, True -> Cabal
+  path    <- getFilePath True -- False -> GHCi, True -> Cabal
   rom     <- LoadRom.readRom path
   size    <- getScreenSize
   rndSeed <- fmap round getPOSIXTime
-  let displaySettings  = Settings size 100
+  let displaySettings  = Settings size 60
   let cpu = CPU.initCPU rom (mkStdGen rndSeed)
   startRenderer displaySettings cpu onRender onInput onUpdate
 

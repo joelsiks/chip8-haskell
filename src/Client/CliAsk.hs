@@ -3,6 +3,7 @@ module Client.CliAsk (getFilePath) where
 
 import System.Directory
 import System.Environment
+import System.IO
 
 {-  getFilePath usingCabal
     asks the user to chose a game found in the specified path and fetches the relative path to that game
@@ -29,6 +30,8 @@ getFilePath iscabal = do
 askForFile :: String -> [String] -> IO String
 askForFile pathStart options = do
     putStrLn $ "Available games: " ++ buildString options
+    putStr "Type in the ROM you would like to launch: "
+    hFlush stdout
     str <- getLine
 
     if str `elem` options

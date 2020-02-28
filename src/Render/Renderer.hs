@@ -1,6 +1,6 @@
 module Render.Renderer (DisplaySettings(..), startRenderer, getScreenSize) where
 
-import CPU.CPU
+import CPU.CPU (CPU)
 import Graphics.Gloss
 import Graphics.Gloss.Data.ViewPort
 import Graphics.Gloss.Interface.IO.Game
@@ -27,20 +27,14 @@ data DisplaySettings = Settings
     RETURNS: A renderer readable picture created from the given pixels
     Examples: createFrame (Settings (2,2) 60) (replicate 64*32 0) == (A black picture at 2x pixel scale)
 -}
-createFrame :: DisplaySettings -> [Int] -> Picture
-createFrame s pixels = bitmapOfByteString 64 32 (BitmapFormat (TopToBottom) (PxRGBA)) bitmapData False
+createFrame :: [Int] -> Picture
+createFrame pixels = bitmapOfByteString 64 32 (BitmapFormat (TopToBottom) (PxRGBA)) bitmapData False
     where
-        bitmapData = createBitmapData pixels
+        bitmapData = pack $ (concat . (map f)) pixels
 
-        createBitmapData :: [Int] -> ByteString
-        createBitmapData a = pack $ foldl f [] a
-            where
-                onCollor  = [255,255,255,255] :: [Word8]
-                offCollor = [0,0,0,255]       :: [Word8]
-                
-                f :: [Word8] -> Int -> [Word8]
-                f a 1 = a ++ onCollor
-                f a _ = a ++ offCollor
+        f :: Int -> [Word8]
+        f 1 = [255,255,255,255]
+        f _ = [0,0,0,255]
 
 {-  renderer settings func cpu
     Applies createFrame to the pixels created from applying func to cpu
@@ -51,7 +45,7 @@ createFrame s pixels = bitmapOfByteString 64 32 (BitmapFormat (TopToBottom) (PxR
     INVARIANT: Called in the internal loop from gloss.play
 -}
 renderer :: DisplaySettings -> (CPU -> [Int]) -> CPU -> Picture
-renderer s f state = scale (x/64) (y/32) $ createFrame s $ f state
+renderer s f state = scale (x/64) (y/32) $ createFrame $ f state
     where
         (a,b) = (size s)
         (x,y) = (realToFrac a, realToFrac b)
@@ -77,4 +71,4 @@ handleKeys _ _ game                              = game
                   Calls hFunc everytime a key is pressed
 -}
 startRenderer :: DisplaySettings -> CPU -> (CPU -> [Int]) -> (Char -> Bool -> CPU -> CPU) -> (Float -> CPU -> CPU) -> IO()
-startRenderer s gS rF hF uF = play FullScreen black (fps s) gS (renderer s rF) (handleKeys hF) uF 
+startRenderer s gS rF hF uF = play FullScreen black (fps s) gS (renderer s rF) (handleKeys hF) uF

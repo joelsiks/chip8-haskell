@@ -26,7 +26,7 @@ data DisplaySettings = Settings
 
     PRE: The number of pixels is equal to the number of pixels required for the given screen size
     RETURNS: A renderer readable picture created from the given pixels
-    Examples: createFrame (Settings (2,2) 60) (replicate 64*32 0) == (A black picture at 2x pixel scale)
+    EXAMPLES: createFrame (replicate (64*32) 1) == (An entirely white picture)
 -}
 createFrame :: [Int] -> Picture
 createFrame pixels = bitmapOfByteString 64 32 (BitmapFormat (TopToBottom) (PxRGBA)) bitmapData False
@@ -44,6 +44,7 @@ createFrame pixels = bitmapOfByteString 64 32 (BitmapFormat (TopToBottom) (PxRGB
          The number of pixels is equal to the number of pixels required for the given screen size
     RETURNS: A renderer readable picture created from the given cpu
     INVARIANT: Called in the internal loop from gloss.play
+    EXAMPLES: renderer (Settings (2,2) 60) (default cpu) == (A black picture at 2x scale)
 -}
 renderer :: DisplaySettings -> CPU -> Picture
 renderer s cpu

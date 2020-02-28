@@ -1,4 +1,5 @@
 module Render.Splash (splash) where
+    
 -- Splash Screen
 -- CHIP-8 Click to start!
 splash :: [Int]

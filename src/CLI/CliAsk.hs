@@ -43,11 +43,21 @@ askForFile options = do
         putStrLn "Invalid input. Try again!\n"
         askForFile options
 
+{-  getFPS name
+    gets the predefiend fps for a rom with the given name or 100
+
+    RETURNS: returns the relative fps to name or 100
+    EXAMPLES: getFPS "PONG" == 60
+              getFPS "X"    == 100
+-}
 getFPS :: String -> Int
 getFPS key = findInList key list
     where
         list = [("PONG",60)]
+
+        -- Search the list for the given name and returns the relative fps, or returns 100
         findInList :: String -> [(String, Int)] -> Int
+        -- VARIANT: length list
         findInList str ((key,fps):xs)
             | str == key = fps
             | otherwise  = findInList str xs

@@ -12,6 +12,7 @@ import Graphics.Gloss.Interface.Environment (getScreenSize)
 import System.Random
 import Data.Time.Clock.POSIX
 
+-- Starts emulator
 main :: IO ()
 main = do
   (path,fps) <- CLI.getRomInfo True -- False -> GHCi, True -> Cabal
@@ -23,6 +24,14 @@ main = do
   startRenderer displaySettings cpu onInput onUpdate
 
 -- Called on input
+{- onInput key isDown cpu
+   registers and unregisters accepted key inputs in the current gamestate or changes nothing
+
+   RETURNS: cpu where key in keyboard changes or returns cpu
+   EXAMPLES: onInput 'a' True (default cpu)  == (cpu where keyboard index 7 is set as True)
+             onInput 'g' True (default cpu)  == (default cpu)
+             onInput 'g' False (default cpu) == (default cpu)
+-}
 onInput :: Char -> Bool -> CPU -> CPU
 onInput key isDown cpu = cpu {keyboard = setKey key isDown (keyboard cpu)}
   where
@@ -46,6 +55,7 @@ onInput key isDown cpu = cpu {keyboard = setKey key isDown (keyboard cpu)}
     setKey _ _ keys = keys
 
 -- Called every frame before onRenderer
+-- Calls Emulate.emulateCycle if currently running
 onUpdate :: Float -> CPU -> CPU
 onUpdate _ cpu
   | (isRunning cpu) = Emulate.emulateCycle cpu

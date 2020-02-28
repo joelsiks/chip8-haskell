@@ -17,7 +17,7 @@ main = do
   rom     <- LoadRom.readRom path
   size    <- getScreenSize
   rndSeed <- fmap round getPOSIXTime
-  let displaySettings  = Settings size 300
+  let displaySettings  = Settings size 100
   let cpu = CPU.initCPU rom (mkStdGen rndSeed)
   startRenderer displaySettings cpu onRender onInput onUpdate
 

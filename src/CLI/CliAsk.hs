@@ -1,5 +1,5 @@
 
-module CLI.CliAsk (getRomInfo) where
+module CLI.CliAsk where
 
 import Data.Char
 import System.Directory
@@ -11,6 +11,8 @@ import System.IO
 
     PRE: there are files in "roms" folder
     RETURNS: The relative path to a game
+    SIDE EFFECTS: lists all files found in path, 
+                 exception thrown if "roms" folder does not exist
     Examples: getRomInfo False (Input TANK) == "../roms/TANK"
               getRomInfo True (Input TANK)  == "roms/TANK"
 -}
@@ -18,7 +20,7 @@ getRomInfo :: Bool -> IO (String, Int)
 getRomInfo iscabal = do
     let pathStart = if iscabal then "roms/" else "../roms/"
     options <- listDirectory pathStart
-    game <- askForFile options
+    game    <- askForFile options
     return (pathStart ++ game, getFPS game)
 
 {-  askForFile path options
@@ -27,6 +29,8 @@ getRomInfo iscabal = do
 
     PRE: options is not empty, path exists
     RETURNS: The relative path to a game and game specific fps
+    SIDE EFFECTS: prints prompts in the terminal,
+                  reads inputs from terminal.
     Examples: askForFile [TANK,PONG] (Input TANK) == "TANK"
 -}
 askForFile :: [String] -> IO String
@@ -55,7 +59,7 @@ getFPS key = findInList key list
     where
         list = [("PONG",60)]
 
-        -- Search the list for the given name and returns the relative fps, or returns 100
+        -- Searches the list for the given name and returns the relative fps, or returns 100
         findInList :: String -> [(String, Int)] -> Int
         -- VARIANT: length list
         findInList str ((key,fps):xs)

@@ -4,7 +4,7 @@ module Main where
 import CPU.CPU as CPU
 import CPU.LoadRom as LoadRom
 import Render.Renderer as Render
-import CLI.CliAsk as CLI
+import CLI.CliAsk as CLI (getRomInfo)
 import CPU.Emulate as Emulate (emulateCycle)
 import CPU.Utility as Util (replace)
 import Graphics.Gloss (blue)

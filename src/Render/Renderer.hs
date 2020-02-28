@@ -1,4 +1,4 @@
-module Render.Renderer (DisplaySettings(..), startRenderer, getScreenSize) where
+module Render.Renderer (DisplaySettings(..), startRenderer, handleKeys) where
 
 import CPU.CPU (CPU(..), isRunning, startCPU)
 import Render.Splash as Splash
@@ -34,8 +34,8 @@ createFrame pixels = bitmapOfByteString 64 32 (BitmapFormat (TopToBottom) (PxRGB
         bitmapData = pack $ (concat . (map f)) pixels
 
         f :: Int -> [Word8]
-        f 1 = [255,255,255,255]
-        f _ = [0,0,0,255]
+        f 0 = [0,0,0,255]
+        f _ = [255,255,255,255]
 
 {-  renderer settings cpu
     Creates an image from the vram component of cpu and scales it to fill the screen
@@ -56,6 +56,7 @@ renderer s cpu
 
 {-  handleKeys func event cpu
     Applies func to cpu whenever a key pressed event is called
+
     PRE: cpu is in a functional state
     INVARIANT: Called in the internal loop from gloss.play
 -}
@@ -66,11 +67,12 @@ handleKeys f (EventKey a s _ _) cpu
     where
         handleKeys' f ((Char key), Down) cpu = f key True  cpu
         handleKeys' f ((Char key),   Up) cpu = f key False cpu
-        handleKeys' _ _ cpu                              = cpu
+        handleKeys' _ _ cpu                  = cpu
 handleKeys _ _ cpu = cpu -- Ignores unwated inputs
 
 {-  startRenderer settings cpu rFunc hFunc uFunc
-    Starts a game
+    Starts a game loop
+
     PRE: cpu is in a functional state,
          The number of pixels is equal to the number of pixels required for the given screen size from settings
     SIDE EFFECTS: Creates a window where the screen is drawn
@@ -78,6 +80,7 @@ handleKeys _ _ cpu = cpu -- Ignores unwated inputs
                   Calls rFunc every frame
                   Calls uFunc every frame
                   Calls hFunc everytime a key is pressed
+                  Excape key stopps the loop
 -}
 startRenderer :: DisplaySettings -> CPU -> (Char -> Bool -> CPU -> CPU) -> (Float -> CPU -> CPU) -> IO()
 startRenderer s cpu hF uF = play FullScreen white (fps s) cpu (renderer s) (handleKeys hF) uF

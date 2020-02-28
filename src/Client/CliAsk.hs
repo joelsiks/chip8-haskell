@@ -1,6 +1,7 @@
 
 module Client.CliAsk (getFilePath) where
 
+import Data.Char
 import System.Directory
 import System.Environment
 import System.IO
@@ -32,7 +33,8 @@ askForFile pathStart options = do
     putStrLn $ "Available games: " ++ buildString options
     putStr "Type in the ROM you would like to launch: "
     hFlush stdout
-    str <- getLine
+    inputStr <- getLine
+    let str = map toUpper inputStr
 
     if str `elem` options
     then return $ pathStart ++ str

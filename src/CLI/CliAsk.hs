@@ -76,5 +76,6 @@ getFPS key = findInList key list
               buildString ["hej", "a"] == "hej, a"
 -}
 buildString :: [String] -> String
+-- VARIANT: length list
 buildString [x]    = x
 buildString (x:xs) = x ++ (',' : ' ' : buildString xs)

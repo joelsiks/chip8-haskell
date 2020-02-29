@@ -52,7 +52,8 @@ renderer s cpu
     | otherwise             = scale (x/64) (y/32) $ createFrame $ concat (vram cpu)
     where
         (a,b) = (size s)
-        (x,y) = (realToFrac a, realToFrac b)
+        x     = realToFrac a
+        y     = realToFrac b
 
 {-  handleKeys func event cpu
     Applies func to cpu whenever a key pressed event is called

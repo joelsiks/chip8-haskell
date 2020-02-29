@@ -65,4 +65,7 @@ Arbete i gruppen:
 	Rapportskrivande.
 
 2020-02-28 18:45-19:30
-	Testfall för cyckel + CPU flagga 
+	Testfall för cyckel + CPU flagga
+
+2020-02-29 14:40-15:50
+	Rapportskrivande och flowchartskapande.

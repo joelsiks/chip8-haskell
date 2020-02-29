@@ -28,6 +28,6 @@ readRom path = do
 -- TODO: More checks to ensure rom is a valid program
 checkRom :: [Int] -> [Int]
 checkRom rom 
-    | length rom > 0xE00 = []
+    | length rom > 0xE00 = error "File too large"
     -- | more checks
     | otherwise = rom 

@@ -49,7 +49,20 @@ Arbete i gruppen:
 	Rapportskrivande.
 
 2020-02-27 14:00-15:00
-	Rapportskrivande. Layout och tidig version. 
+	Rapportskrivande. Layout och utkast av stora delar. 
 
 2020-02-27 17:00-18:30
-	Rapportskrivande. CPU specifikation och funktionsbeskrivning
+	Rapportskrivande. CPU specifikation och funktionsbeskrivning.
+
+2020-02-28 10:00-13:30
+
+Arbete i gruppen:
+	Rapportskrivande.
+	Design och Implementation av splash screen.
+	Möte med vår coach.
+
+2020-02-28 16:00-16:45
+	Rapportskrivande.
+
+2020-02-28 18:45-19:30
+	Testfall för cyckel + CPU flagga 

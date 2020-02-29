@@ -2,7 +2,6 @@
 module CPU.CPU where
 
 import System.IO
-import CPU.LoadRom
 import System.Random
 
 windowHeight = 32

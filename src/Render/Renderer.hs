@@ -52,7 +52,8 @@ renderer s cpu
     | otherwise             = scale (x/64) (y/32) $ createFrame $ concat (vram cpu)
     where
         (a,b) = (size s)
-        (x,y) = (realToFrac a, realToFrac b)
+        x     = realToFrac a
+        y     = realToFrac b
 
 {-  handleKeys func event cpu
     Applies func to cpu whenever a key pressed event is called
@@ -70,14 +71,14 @@ handleKeys f (EventKey a s _ _) cpu
         handleKeys' _ _ cpu                  = cpu
 handleKeys _ _ cpu = cpu -- Ignores unwated inputs
 
-{-  startRenderer settings cpu rFunc hFunc uFunc
+{-  startRenderer settings cpu hFunc uFunc
     Starts a game loop
 
     PRE: cpu is in a functional state,
          The number of pixels is equal to the number of pixels required for the given screen size from settings
     SIDE EFFECTS: Creates a window where the screen is drawn
                   Updates the screen every frame
-                  Calls rFunc every frame
+                  Calls renderer every frame
                   Calls uFunc every frame
                   Calls hFunc everytime a key is pressed
                   Excape key stopps the loop

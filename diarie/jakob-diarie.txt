@@ -32,3 +32,20 @@
 - Implementerade CliAsk modulen som tillåter spelaren att välja spel
 - Skrev dokumentationen till CliAsk modulen
 - Ändrade dokumentationen på vissa funktioner till renderer
+
+28/02 10:00 - 13:30
+- Möte med vår coach & grupparbete
+- Implementerade individuella fps inställningar för olika roms
+- Implementerade en splash screen som visas innan första inputen har registreras.
+  Är där för att påminna användaren att fokusera förnstret
+- Lagt till Render.Splash modulen som innehåller en bitmap representerande vår splash screen
+- Tog bort onödig kod
+- Lagt till dokumetation för flera funktioner
+
+28/02 16:30 - 18:00
+- Implementerade enstaka test-cases för Renderer och CliAsk modulerna
+- Små förbättringar
+
+29/02 9:40 - 10:50
+- Skrev om dokumetationen efter ändringar gjorda tidigare
+- Tittat igenom funktions beskrivningarna och fixat enstaka problem

@@ -46,6 +46,7 @@
 - Implementerade enstaka test-cases för Renderer och CliAsk modulerna
 - Små förbättringar
 
-29/02 9:40 - 10:50
+29/02 9:40 - 11:50
 - Skrev om dokumetationen efter ändringar gjorda tidigare
 - Tittat igenom funktions beskrivningarna och fixat enstaka problem
+- Skrev dokumentation om CliAsk

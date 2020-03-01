@@ -50,3 +50,7 @@
 - Skrev om dokumetationen efter ändringar gjorda tidigare
 - Tittat igenom funktions beskrivningarna och fixat enstaka problem
 - Skrev dokumentation om CliAsk
+
+01/03 14:40 - 16:00
+- Gjorde flowchart till renderer modulen i dokumetationen 
+- Skrev om delar av dokumetationen

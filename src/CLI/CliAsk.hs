@@ -58,6 +58,8 @@ getFPS :: String -> Int
 getFPS key = findInList key list
     where
         list = [("15PUZZLE",320),("BLINKY",600),("CONNECT4",50),("HIDDEN", 80),("KALEID",600),("MAZE",300),("PONG",300),("TETRIS",120),("TICTAC",80),("VERS",120)]
+        
+        -- Matches a given key to a list value
         findInList :: String -> [(String, Int)] -> Int
         -- VARIANT: length list
         findInList str ((key,fps):xs)

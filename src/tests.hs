@@ -273,7 +273,9 @@ testHandleKeys = TestCase $ assertEqual ("handleKeys where q is pressed") (keybo
 -- CliAsk Tests
 
 -- getFPS
-testGetFPS = TestCase $ assertEqual "getFPS for PONG" (getFPS "PONG") 300
+testGetFPS = TestList [TestCase $ assertEqual "getFPS for PONG" (getFPS "PONG") 300,
+                       TestCase $ assertEqual "getFPS for BLINKY" (getFPS "BLINKY") 600,
+                       TestCase $ assertEqual "getFPS for undefined rom" (getFPS "X") 100]
 
 -- buildString
 testBuildString = TestCase $ assertEqual "buildString for [jag,hello,str]" (buildString ["jag","hello","str"]) "jag, hello, str"

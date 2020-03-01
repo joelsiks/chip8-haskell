@@ -18,7 +18,7 @@ getRomInfo :: Bool -> IO (String, Int)
 getRomInfo iscabal = do
     let pathStart = if iscabal then "roms/" else "../roms/"
     options <- listDirectory pathStart
-    game <- askForFile options
+    game <- askForFile (reverse options)
     return (pathStart ++ game, getFPS game)
 
 {-  askForFile path options

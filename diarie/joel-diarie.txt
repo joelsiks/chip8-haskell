@@ -95,3 +95,28 @@ UNIX-timestamp.
 27/02 17:30-19:00
 
 Skrivit på dokumentationen. Fokuserat främst på "Use cases" och "Introduction" avsnitten.
+
+28/02 10:00-14:00
+
+Vi har träffats i gruppen och finslipat på emulatorn.
+Lagt till en initialiseringsskärm där användaren måste trycka på emulator fönstret för att
+starta emulatorn.
+Jobbat på flowcharts för dokumentationen och även skrivit lite under Technical description.
+Börjar implementera testfall för individuella opcodes.
+
+28/02 17:00-18:30
+Fortsatt implementera testfall för individuella opcodes.
+Lagt till beskrivningar för alla opcodes i Emulate.hs
+
+29/02 12:30-13:30
+Fortsatt implementera testfall för individuella opcodes.
+
+01/03 14:00-16:30
+Åtgärdet 3 buggar som hittats i implementationen för opcodes i Emulate.hs som hittats p.g.a
+enhetstesterna. Alla 3 berodde på att en modulo operation glömdes att göras, vilket kan resultera
+i att ett värde kan bli större än vad det egentligen får vara.
+Färdig med att implementera testfall för alla opcodes så nu är alla enhetstester färdiga
+för hela projektet.
+Lagt till fullständiga funtkionsspecifikationer där det är relevant i Emulate.hs
+och finslipat på andra specifikationer/kommentarer.
+

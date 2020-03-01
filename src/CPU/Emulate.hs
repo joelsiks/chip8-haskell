@@ -9,6 +9,16 @@ import Data.Bits
 import System.Random
 import System.Exit
 
+{- Represents an instruction for the CHIP-8
+   Opcode is a two-byte value that is stored in big-endian format.
+   Each Integer in Opcode is a hexadecimal value between 0-F.
+   The two first Ints in Opcode corresponds to the first byte of the instruction, 
+   and the last two corresponds to the second byte. 
+
+   INVARIANT: Each integer in Opcode is a hexadecimal character, i.e 0-9 or A-F.
+-}
+type Opcode = (Int, Int, Int, Int)
+
 {- emulateCycle cpu
    Emulates 1 cycle of the CPU
 
@@ -28,16 +38,6 @@ emulateCycle cpu = decreseTimers $ executeOpcode cpu (fetchOpcode cpu)
 -}
 decreseTimers :: CPU -> CPU
 decreseTimers cpu = cpu {sound_timer = max 0 (sound_timer cpu - 1), delay_timer = max 0 (delay_timer cpu - 1)}
-
-{- Represents an instruction for the CHIP-8
-   Opcode is a two-byte value that is stored in big-endian format.
-   Each Integer in Opcode is a hexadecimal value between 0-F.
-   The two first Ints in Opcode corresponds to the first byte of the instruction, 
-   and the last two corresponds to the second byte. 
-
-   INVARIANT: Each integer in Opcode is a hexadecimal character, i.e 0-9 or A-F.
--}
-type Opcode = (Int, Int, Int, Int)
 
 {- fetchOpcode cpu
    Fetches an opcode from the memory of a CPU.

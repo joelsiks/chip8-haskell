@@ -58,5 +58,5 @@ onInput key isDown cpu = cpu {keyboard = setKey key isDown (keyboard cpu)}
 -- Calls Emulate.emulateCycle if currently running
 onUpdate :: Float -> CPU -> CPU
 onUpdate _ cpu
-  | (isRunning cpu) = Emulate.emulateCycle cpu
-  | otherwise       = cpu
+  | isRunning cpu = Emulate.emulateCycle cpu
+  | otherwise     = cpu

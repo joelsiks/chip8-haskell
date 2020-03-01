@@ -428,15 +428,13 @@ testShiftLeft =
     n2 = 20
     ucpu1 = setRegister blankCPU regIndex n1
     ucpu2 = setRegister blankCPU regIndex n2
-  in
-    TestList [
-      -- Tests if 8-bit overflow "wraps" around correctly. 
-      TestCase $ assertEqual ("shiftRegLeft (cpu where (v cpu !! " ++ show regIndex ++ ") = " ++ show n1 ++ ") " ++ show regIndex)
-        (v (shiftRegLeft ucpu1 regIndex) !! regIndex) 192
-      -- Tests normal use case.
-    , TestCase $ assertEqual ("shiftRegLeft (cpu where (v cpu !! " ++ show regIndex ++ ") = " ++ show n2 ++ ") " ++ show regIndex)
-        (v (shiftRegLeft ucpu2 regIndex) !! regIndex) 40
-    ]
+  in          -- Tests if 8-bit overflow "wraps" around correctly. 
+    TestList [TestCase $ assertEqual ("shiftRegLeft (cpu where (v cpu !! " ++ show regIndex ++ ") = " ++ show n1 ++ ") " ++ show regIndex)
+                (v (shiftRegLeft ucpu1 regIndex) !! regIndex) 192
+               -- Tests normal use case.
+             , TestCase $ assertEqual ("shiftRegLeft (cpu where (v cpu !! " ++ show regIndex ++ ") = " ++ show n2 ++ ") " ++ show regIndex)
+                 (v (shiftRegLeft ucpu2 regIndex) !! regIndex) 40
+             ]
 
 -- shiftRegRight
 testShiftRight =
@@ -447,12 +445,11 @@ testShiftRight =
     ucpu1 = setRegister blankCPU regIndex n1
     ucpu2 = setRegister blankCPU regIndex n2
   in
-    TestList [
-      TestCase $ assertEqual ("shiftRegRight (cpu where (v cpu !! " ++ show regIndex ++ ") = " ++ show n1 ++ ") " ++ show regIndex)
-        (v (shiftRegRight ucpu1 regIndex) !! regIndex) 112
-    , TestCase $ assertEqual ("shiftRegRight (cpu where (v cpu !! " ++ show regIndex ++ ") = " ++ show n2 ++ ") " ++ show regIndex)
-        (v (shiftRegRight ucpu2 regIndex) !! regIndex) 10
-    ]
+    TestList [ TestCase $ assertEqual ("shiftRegRight (cpu where (v cpu !! " ++ show regIndex ++ ") = " ++ show n1 ++ ") " ++ show regIndex)
+                   (v (shiftRegRight ucpu1 regIndex) !! regIndex) 112
+             , TestCase $ assertEqual ("shiftRegRight (cpu where (v cpu !! " ++ show regIndex ++ ") = " ++ show n2 ++ ") " ++ show regIndex)
+                   (v (shiftRegRight ucpu2 regIndex) !! regIndex) 10
+             ]
 
 -------------------------------- 
 -- Renderer Tests

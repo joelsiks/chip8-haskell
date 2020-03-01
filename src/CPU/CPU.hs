@@ -7,7 +7,6 @@ import System.Random
 windowHeight = 32
 windowWidth  = 64
 
-
 {- Represents a centralised state for the CPU of the CHIP-8.
    The CHIP-8's state is the inner workings of the computer. It holds all the necessary data
    that it needs to have in order to execute any instructions and to interpret any data.
@@ -57,6 +56,7 @@ initCPU rom randomgen = Cpu { v = replicate 16 0
                             , isRunning = False
                             }
 
+-- Changes isRunning field of a CPU to True.
 startCPU :: CPU -> CPU
 startCPU cpu = cpu {isRunning = True}
 
@@ -65,26 +65,26 @@ defaultVRAM :: [[Int]]
 defaultVRAM = replicate windowHeight (replicate windowWidth 0)
 
 {- initMemory rom
-     Loads the fontset and a program onto the processors memory
+   Loads the fontset and a program onto the processors memory
 
-     RETURNS: fontset ++ (zeros up to adress 0x200) ++ program ++ (zeros to fill out rest of memory)
-     EXAMPLES: initMemory ('rom' containing 3 characters) = fontset ++ (zeros to index 512) ++ [13,10,35] ++ (zeros to index 4096)
-  -}
+   RETURNS: fontset ++ (zeros up to adress 0x200) ++ program ++ (zeros to fill out rest of memory)
+   EXAMPLES: initMemory ('rom' containing 3 characters) = fontset ++ (zeros to index 512) ++ [13,10,35] ++ (zeros to index 4096)
+-}
 initMemory :: [Int] -> [Int]
 initMemory rom = fontset ++ replicate (0x200 - length fontset) 0 ++ padRom rom
 
 {- padRom rom
-     Pads rom with empty data to fill up memory
+   Pads rom with empty data to fill up memory
 
-     RETURNS: a list of length 3854 consisting of rom ++ (replicate (3854 - length rom) 0)
-     EXAMPLES: readRom [1,2,3,4] = [1,2,3,4] ++ (replicate 3850 0)
-  -}
+   RETURNS: a list of length 3854 consisting of rom ++ (replicate (3854 - length rom) 0)
+   EXAMPLES: readRom [1,2,3,4] = [1,2,3,4] ++ (replicate 3850 0)
+-}
 padRom :: [Int] -> [Int]
 padRom rom
   | memLeft < 0 = error "Program too large"
   | null rom = error "File error"
   | otherwise = rom ++ replicate memLeft 0
-      where memLeft = 0xE00 - length rom
+    where memLeft = 0xE00 - length rom
 
 -- Fontset for drawing characters to the screen.
 fontset :: [Int]

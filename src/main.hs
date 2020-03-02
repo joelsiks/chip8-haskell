@@ -25,7 +25,7 @@ main = do
 
 -- Called on input
 {- onInput key isDown cpu
-   registers and unregisters accepted key inputs in the current gamestate or changes nothing
+   Registers and unregisters accepted key inputs in the current gamestate or changes nothing.
 
    RETURNS: cpu where key in keyboard changes or returns cpu
    EXAMPLES: onInput 'a' True (default cpu)  == (cpu where keyboard index 7 is set as True)

@@ -3,6 +3,7 @@ module CPU.CPU where
 
 import System.IO
 import System.Random
+import CPU.Utility as Util
 
 windowHeight = 32
 windowWidth  = 64
@@ -63,7 +64,7 @@ defaultVRAM :: [[Int]]
 defaultVRAM = replicate windowHeight (replicate windowWidth 0)
 
 {- initMemory rom
-   Loads the fontset and a program onto the processors memory
+   Loads the fontset and a program onto the processors memory.
 
    RETURNS: fontset ++ (zeros up to adress 0x200) ++ program ++ (zeros to fill out rest of memory)
    EXAMPLES: initMemory ('rom' containing 3 characters) = fontset ++ (zeros to index 512) ++ [13,10,35] ++ (zeros to index 4096)
@@ -72,7 +73,7 @@ initMemory :: [Int] -> [Int]
 initMemory rom = fontset ++ replicate (0x200 - length fontset) 0 ++ padRom rom
 
 {- padRom rom
-   Pads rom with empty data to fill up memory
+   Pads rom with empty data to fill up memory.
 
    RETURNS: a list of length 3854 consisting of rom ++ (replicate (3854 - length rom) 0)
    EXAMPLES: readRom [1,2,3,4] = [1,2,3,4] ++ (replicate 3850 0)
@@ -83,6 +84,35 @@ padRom rom
   | null rom = error "File error"
   | otherwise = rom ++ replicate memLeft 0
     where memLeft = 0xE00 - length rom
+
+{- setKey key bool keyboard
+   Sets a key in a keyboard to True or False.
+
+   PRE: length keyboard = 16
+   RETURNS: if key is a valid input, it updates the index of that key in keyboard to bool,
+            otherwise the unaltered keyboard is returned.
+   EXAMPLES: setKey 'a' True  (replicate 16 False) == (list where index 7 is True)
+             setKey 'g' True  (replicate 16 False) == (replicate 16 False)
+             setKey 'g' False (replicate 16 False) == (replicate 16 False)
+-}
+setKey :: Char -> Bool -> [Bool] -> [Bool]
+setKey '1' b keys = Util.replace 0x1 b keys
+setKey '2' b keys = Util.replace 0x2 b keys
+setKey '3' b keys = Util.replace 0x3 b keys
+setKey '4' b keys = Util.replace 0xC b keys
+setKey 'q' b keys = Util.replace 0x4 b keys
+setKey 'w' b keys = Util.replace 0x5 b keys
+setKey 'e' b keys = Util.replace 0x6 b keys
+setKey 'r' b keys = Util.replace 0xD b keys
+setKey 'a' b keys = Util.replace 0x7 b keys
+setKey 's' b keys = Util.replace 0x8 b keys
+setKey 'd' b keys = Util.replace 0x9 b keys
+setKey 'f' b keys = Util.replace 0xE b keys
+setKey 'z' b keys = Util.replace 0xA b keys
+setKey 'x' b keys = Util.replace 0x0 b keys
+setKey 'c' b keys = Util.replace 0xB b keys
+setKey 'v' b keys = Util.replace 0xF b keys
+setKey _ _ keys = keys
 
 -- Fontset for drawing characters to the screen.
 fontset :: [Int]

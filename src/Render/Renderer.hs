@@ -38,11 +38,12 @@ createFrame pixels = bitmapOfByteString 64 32 (BitmapFormat TopToBottom PxRGBA) 
 {- renderer settings cpu
    Creates an image from the vram component of cpu and scales it to fill the screen.
 
-   PRE: cpu is in a functional state,
-        The number of pixels is equal to the number of pixels required for the given screen size
+   PRE: cpu is in a functional state
    RETURNS: a renderer readable picture created from the given cpu
-   INVARIANT: called in the internal loop from gloss.play
-   EXAMPLES: renderer (Settings (2,2) 60) (default cpu) == (A black picture at 2x scale)
+   EXAMPLES: renderer (Settings (64,32) 60) (default cpu)                          
+             == (A black picture at 1x scale)
+             renderer (Settings (64,32) 60) (default cpu where isRunning == False) 
+             == (The splash screen picture at 1x scale)
 -}
 renderer :: DisplaySettings -> CPU -> Picture
 renderer s cpu
@@ -57,8 +58,13 @@ renderer s cpu
    Applies func to cpu whenever a key pressed event is called.
 
    PRE: cpu is in a functional state
-   TODO: invariant på funktion?
-   INVARIANT: called in the internal loop from gloss.play
+        func is the onInput function found in the Main module
+   EXAMPLES: handleKeys (onInput function from main) (EventKey (Char 'q') Down (Modifiers Down Down Down)) (default cpu) 
+             == (cpu where keyboard at index 4 is True)
+             handleKeys (onInput function from main) (EventKey (Char 'q') Down (Modifiers Down Down Down)) (default cpu where isRunning == False)
+             == (default cpu)
+             handleKeys (onInput function from main) (EventKey (Char 'k') Down (Modifiers Down Down Down)) (default cpu) 
+             == (default cpu)
 -}
 handleKeys :: (Char -> Bool -> CPU -> CPU) -> Event -> CPU -> CPU
 handleKeys f (EventKey a s _ _) cpu

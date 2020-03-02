@@ -32,7 +32,6 @@ data CPU = Cpu { v :: [Int]             -- 16 V Registers with 8-bit registrars.
                , stack :: [Int]         -- Stack. List of 16 16-bit values.
                , sp :: Int              -- Pointer to current place in the stack.
                , vram :: [[Int]]        -- Memory containing what pixels are to be drawed on the screen.
-               , vram_changed :: Bool
                , keyboard :: [Bool]     -- List with bools representing if a certain key has been pressed.
                , rgen :: StdGen         -- Random number generator.
                , isRunning :: Bool      -- Flag if the emulator is running.
@@ -50,7 +49,6 @@ initCPU rom randomgen = Cpu { v = replicate 16 0
                             , stack = replicate 16 0
                             , sp = 0
                             , vram = defaultVRAM
-                            , vram_changed = False
                             , keyboard = replicate 16 False
                             , rgen = randomgen
                             , isRunning = False

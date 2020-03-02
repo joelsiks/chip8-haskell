@@ -272,7 +272,7 @@ testBuildString = TestCase $ assertEqual "buildString for [jag,hello,str]" (buil
 emulateTests = TestList [ testCycle, testTimers, testOPNNN, testOPNN, testFOp1, testIncPC, testJump, testInsertStack, testRetSub
                         , testSkipIf1, testSkipIf2, testSetReg, testSetMem, testStoreBCD, testStoreReg
                         , testLoadReg, testRandVal, testCheckInput1, testCheckInput2, testShiftLeft
-                        , testShiftRight, testHandleKeys, testGetFPS, testBuildString
+                        , testShiftRight, testGetFPS, testBuildString
                         ]
 
 -------------------------------- 

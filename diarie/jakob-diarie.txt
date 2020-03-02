@@ -54,3 +54,6 @@
 01/03 14:40 - 16:00
 - Gjorde flowchart till renderer modulen i dokumetationen 
 - Skrev om delar av dokumetationen
+
+02/03 15:15 - 15:30
+- Tog bort invarianter från funktioner och skrev om dem som preconditions

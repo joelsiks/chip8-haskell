@@ -1,4 +1,3 @@
-
 module CPU.LoadRom where 
 
 import System.IO
@@ -30,5 +29,5 @@ readRom path = do
 checkRom :: [Int] -> [Int]
 checkRom rom 
   | length rom > 0xE00 = error "File too large"
-  -- | more checks
+  | length rom `mod` 2 /= 0 = error "File contains an odd number of bytes and therefore contains not opcodes."
   | otherwise = rom 

@@ -23,7 +23,8 @@ type Opcode = (Int, Int, Int, Int)
 
    RETURNS: a new cpu where the opcode has been fetched and executed, and sound_timer and delay_timer have been decreesed by 1
    EXAMPLES: emulateCycle (cpu where opcode is to store val at idx) = (cpu where val is stored at idx)
-             TODO?
+             emulateCycle (cpu where opcode is to clear vram) = (cpu with vram cleared)
+             
 -}
 emulateCycle :: CPU -> CPU
 emulateCycle cpu = decreseTimers $ executeOpcode cpu (fetchOpcode cpu)

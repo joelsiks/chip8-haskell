@@ -111,7 +111,7 @@ Lagt till beskrivningar för alla opcodes i Emulate.hs
 29/02 12:30-13:30
 Fortsatt implementera testfall för individuella opcodes.
 
-01/03 14:00-16:30
+01/03 14:00-17:30
 Åtgärdet 3 buggar som hittats i implementationen för opcodes i Emulate.hs som hittats p.g.a
 enhetstesterna. Alla 3 berodde på att en modulo operation glömdes att göras, vilket kan resultera
 i att ett värde kan bli större än vad det egentligen får vara.
@@ -119,4 +119,19 @@ Färdig med att implementera testfall för alla opcodes så nu är alla enhetste
 för hela projektet.
 Lagt till fullständiga funtkionsspecifikationer där det är relevant i Emulate.hs
 och finslipat på andra specifikationer/kommentarer.
+Har ändrat i alla kodfiler så att vi har samma indentering genom alla filer och att
+vi har samma stil struktur.
+
+02/03 13:00-17:00
+Åtgärdat fel i commits där många testfall råkats ta bort.
+Ändrat i kodfilerna så att onödiga imports, felaktiga test-fall och felaktiga
+funktions-specifikationer korrigerats.
+Skrivit CHIP-8 specifikation i dokumentationen under Appendix.
+Strukturerat om och lagt till saker under Use Cases i dokumentationen.
+Ändrat i flera delar av dokumentationen tillsammans med de andra
+gruppmedlemmarna.
+
+03/03 17:00-19:00
+Skrivit om delar av rapporten där vi inte har varit tydliga nog.
+Förövrigt jobbat med rapporten i alla dess delar.
 

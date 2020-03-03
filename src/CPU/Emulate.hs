@@ -1,7 +1,6 @@
 
 module CPU.Emulate where
 
-import Debug.Trace
 import Control.Lens
 import CPU.CPU as CPU
 import CPU.Utility as Util

@@ -9,7 +9,7 @@ import Data.Bits ((.&.), (.|.), xor, shiftL, shiftR)
 import System.Random (mkStdGen, randomR)
 
 standardGen = mkStdGen 0
-blankCPU = startCPU $ initCPU [0] standardGen
+blankCPU = startCPU $ initCPU [0,0,0,0] standardGen
 
 -------------------------------- 
 -- CPU Tests
@@ -20,30 +20,30 @@ testSetKey = let keyboard = replicate 16 False
 
 --initCPU
 -- Timers should always be >= 0
-testICPU1 = let cpu = CPU.initCPU [1,2,3] (mkStdGen 0)
-            in TestCase $ assertBool "initCPU [1,2,3] (mkStdGen 0)" 
+testICPU1 = let cpu = CPU.initCPU [1,2,3,4] (mkStdGen 0)
+            in TestCase $ assertBool "initCPU [1,2,3,4] (mkStdGen 0)" 
                  (sound_timer cpu >= 0 && delay_timer cpu >= 0)
 
 -- Memory size is constant
-testICPU2 = let cpu = CPU.initCPU [1,2,3] (mkStdGen 0)
-            in TestCase $ assertEqual "initCPU [1,2,3] (mkStdGen 0)" 4096 (length (memory cpu))
+testICPU2 = let cpu = CPU.initCPU [1,2,3,4] (mkStdGen 0)
+            in TestCase $ assertEqual "initCPU [1,2,3,4] (mkStdGen 0)" 4096 (length (memory cpu))
 
 -- Vram should be blank and a constant size of 64*32
-testICPU3 = let cpu = CPU.initCPU [1,2,3] (mkStdGen 0)
-            in TestCase $ assertEqual "initCPU [1,2,3] (mkStdGen 0)" 
+testICPU3 = let cpu = CPU.initCPU [1,2,3,4] (mkStdGen 0)
+            in TestCase $ assertEqual "initCPU [1,2,3,4] (mkStdGen 0)" 
                  (replicate (64*32) 0) (concat (vram cpu))
 
 -- Check that running flag is set correctly
-testSCPU = let cpu = CPU.initCPU [1,2,3] (mkStdGen 0)
+testSCPU = let cpu = CPU.initCPU [1,2,3,4] (mkStdGen 0)
            in TestCase $ assertEqual "startCPU cpu" True (isRunning (CPU.startCPU cpu))
 
 -- initMemory
 -- Check that memory is the correct size
-testIM1 = TestCase $ assertEqual "initMemory [1,2,3]" 4096 (length (CPU.initMemory [1,2,3]))
+testIM1 = TestCase $ assertEqual "initMemory [1,2,3,4]" 4096 (length (CPU.initMemory [1,2,3,4]))
 -- Check that fontset loaded correctly
-testIM2 = TestCase $ assertEqual "initMemory [1]" 0x90 (CPU.initMemory [1] !! 2)
+testIM2 = TestCase $ assertEqual "initMemory [1,2]" 0x90 (CPU.initMemory [1,2] !! 2)
 -- Check that program loaded at correct index
-testIM3 = TestCase $ assertEqual "initMemory [0xA,0xB,0xC]" 0xB (CPU.initMemory [0xA,0xB,0xC] !! 513)
+testIM3 = TestCase $ assertEqual "initMemory [0xA,0xB,0xC,0xD]" 0xB (CPU.initMemory [0xA,0xB,0xC,0xD] !! 513)
 
 -- padRom
 -- Program with padding should be constant size 
@@ -55,7 +55,7 @@ cpuTests = TestList [testSetKey, testICPU1, testICPU2, testICPU3, testSCPU, test
 -- Rom Tests
 
 -- checkRom
-testCR1 = TestCase $ assertEqual "checkRom [1,2,3]" [1,2,3] (LoadRom.checkRom [1,2,3])
+testCR1 = TestCase $ assertEqual "checkRom [1,2,3,4]" [1,2,3,4] (LoadRom.checkRom [1,2,3,4])
 testCR2 = TestCase $ assertEqual "checkRom ([4097 zeros])" 0 (length (LoadRom.checkRom (replicate 0 4097)))
 
 romTests = TestList [testCR1, testCR2]

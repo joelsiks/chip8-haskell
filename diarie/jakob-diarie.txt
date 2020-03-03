@@ -57,3 +57,12 @@
 
 02/03 15:15 - 15:30
 - Tog bort invarianter från funktioner och skrev om dem som preconditions
+
+02/03 16:30 - 18:00
+- Skrev i projekt dokumentationen (gick igenom dokumetet, skrev om delar av renderer och skrev om fler ROM checks i "work to be done")
+
+03/03 11:00 - 12:10
+- Började på sammanfattningen
+
+03/03 16:00 - 19:00
+- Skrev i projekt dokumentationen (skrev om delar, skrev om varför vi valde Gloss)

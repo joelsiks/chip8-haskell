@@ -26,8 +26,8 @@ windowWidth  = 64
 -- https://en.wikipedia.org/wiki/CHIP-8#Virtual_machine_description
 data CPU = Cpu { v :: [Int]             -- 16 V Registers with 8-bit registrars. Index 0, 1, 2 ... E, F.
                , i :: Int               -- 16 bit register for memory address.
-               , sound_timer :: Int     
-               , delay_timer :: Int     
+               , sound_timer :: Int     -- Timer for playing sounds.
+               , delay_timer :: Int     -- Used to delay certain operations.
                , pc :: Int              -- Pointer to memory for current opcode.
                , memory :: [Int]        -- Place to store program data (instructions). 4096 bytes.
                , stack :: [Int]         -- Stack. List of 16 16-bit values.
@@ -64,7 +64,7 @@ defaultVRAM :: [[Int]]
 defaultVRAM = replicate windowHeight (replicate windowWidth 0)
 
 {- initMemory rom
-   Loads the fontset and a program onto the processors memory.
+   Loads the fontset and a rom onto a CPUs memory.
 
    RETURNS: fontset ++ (zeros up to adress 0x200) ++ program ++ (zeros to fill out rest of memory)
    EXAMPLES: initMemory ('rom' containing 3 characters) = fontset ++ (zeros to index 512) ++ [13,10,35] ++ (zeros to index 4096)
@@ -76,7 +76,7 @@ initMemory rom = fontset ++ replicate (0x200 - length fontset) 0 ++ padRom rom
    Pads rom with empty data to fill up memory.
 
    RETURNS: a list of length 3854 consisting of rom ++ (replicate (3854 - length rom) 0)
-   EXAMPLES: readRom [1,2,3,4] = [1,2,3,4] ++ (replicate 3850 0)
+   EXAMPLES: padRom [1,2,3,4] = [1,2,3,4] ++ (replicate 3850 0)
 -}
 padRom :: [Int] -> [Int]
 padRom rom
@@ -92,8 +92,8 @@ padRom rom
    RETURNS: if key is a valid input, it updates the index of that key in keyboard to bool,
             otherwise the unaltered keyboard is returned.
    EXAMPLES: setKey 'a' True  (replicate 16 False) == (list where index 7 is True)
+             setKey 's' False (replicate 16 True)  == (list where index 8 is False and the rest is True)
              setKey 'g' True  (replicate 16 False) == (replicate 16 False)
-             setKey 'g' False (replicate 16 False) == (replicate 16 False)
 -}
 setKey :: Char -> Bool -> [Bool] -> [Bool]
 setKey '1' b keys = Util.replace 0x1 b keys

@@ -10,20 +10,18 @@ import Graphics.Gloss.Interface.Environment (getScreenSize)
 import Data.Word
 import Data.ByteString (ByteString, pack) -- Same as a bitmap
 
-{- Represents a holder for all display variables.
+{- Represents a container for all display variables.
    Stores variables used for the creaton of a display.
-
-   INVARIANT: used for functions asociated with startRenderer
 -}
 data DisplaySettings = Settings { size :: (Int, Int)
                                 , fps  :: Int
                                 } deriving (Show)
 
 {- createFrame settings pixels.
-   converts the given pixels into a renderer readable picture.
+   Converts a set of pixels into a picture.
 
    PRE: the number of pixels is equal to the number of pixels required for the given screen size
-   RETURNS: a renderer readable picture created from the given pixels
+   RETURNS: a Picture created from pixels
    EXAMPLES: createFrame (replicate (64*32) 1) == (An entirely white picture)
 -}
 createFrame :: [Int] -> Picture
@@ -36,10 +34,9 @@ createFrame pixels = bitmapOfByteString 64 32 (BitmapFormat TopToBottom PxRGBA) 
     f _ = [255,255,255,255]
 
 {- renderer settings cpu
-   Creates an image from the vram component of cpu and scales it to fill the screen.
+   Creates an image from the VRAM of a CPU and scales it to fill the screen.
 
-   PRE: cpu is in a functional state
-   RETURNS: a renderer readable picture created from the given cpu
+   RETURNS: a picture created from (vram cpu).
    EXAMPLES: renderer (Settings (64,32) 60) (default cpu)                          
              == (A black picture at 1x scale)
              renderer (Settings (64,32) 60) (default cpu where isRunning == False) 
@@ -55,10 +52,9 @@ renderer s cpu
       y      = realToFrac b
 
 {- handleKeys func event cpu
-   Applies func to cpu whenever a key pressed event is called.
+   Applies func to cpu if it is running, otherwise starts the CPU.
 
-   PRE: cpu is in a functional state
-        func is the onInput function found in the Main module
+   RETURNS: a new cpu where func has been applied to cpu
    EXAMPLES: handleKeys (onInput function from main) (EventKey (Char 'q') Down (Modifiers Down Down Down)) (default cpu) 
              == (cpu where keyboard at index 4 is True)
              handleKeys (onInput function from main) (EventKey (Char 'q') Down (Modifiers Down Down Down)) (default cpu where isRunning == False)
@@ -77,15 +73,14 @@ handleKeys f (EventKey a s _ _) cpu
 handleKeys _ _ cpu = cpu -- Ignores unwated inputs
 
 {- startRenderer settings cpu hFunc uFunc
-   Starts a game loop.
+   Starts an emulation loop.
 
-   PRE: cpu is in a functional state,
-        The number of pixels is equal to the number of pixels required for the given screen size from settings
+   RETURNS: IO ()
    SIDE EFFECTS: Creates a window where the screen is drawn
                  Updates the screen every frame
                  Calls renderer every frame
                  Calls uFunc every frame
-                 Calls hFunc everytime a key is pressed
+                 Calls handleKeys with hFunc everytime a key is pressed
                  Excape key stopps the loop
 -}
 startRenderer :: DisplaySettings -> CPU -> (Char -> Bool -> CPU -> CPU) -> (Float -> CPU -> CPU) -> IO()

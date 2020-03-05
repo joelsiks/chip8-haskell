@@ -8,33 +8,33 @@ import Data.Bits
 import System.Random
 import System.Exit
 
-{- Represents an instruction for the CHIP-8
+{- Represents an instruction for the CHIP-8.
    Opcode is a two-byte value that is stored in big-endian format.
    Each Integer in Opcode is a hexadecimal value between 0-F.
    The two first Ints in Opcode corresponds to the first byte of the instruction, 
    and the last two corresponds to the second byte. 
 
-   INVARIANT: Each integer in Opcode is a hexadecimal character, i.e 0-9 or A-F.
+   INVARIANT: Each integer in Opcode is a hexadecimal number, i.e 0-9 or A-F.
 -}
 type Opcode = (Int, Int, Int, Int)
 
 {- emulateCycle cpu
-   Emulates 1 cycle of the CPU
+   Emulates one cycle of a CPU.
 
-   RETURNS: a new cpu where the opcode has been fetched and executed, and sound_timer and delay_timer have been decreesed by 1
+   RETURNS: a new cpu where an opcode has been fetched and executed, and sound_timer and delay_timer have been decremented.
    EXAMPLES: emulateCycle (cpu where opcode is to store val at idx) = (cpu where val is stored at idx)
-             emulateCycle (cpu where opcode is to clear vram) = (cpu with vram cleared)
+             emulateCycle (cpu where opcode is to clear vram)       = (cpu with vram cleared)
              
 -}
 emulateCycle :: CPU -> CPU
 emulateCycle cpu = decreseTimers $ executeOpcode cpu (fetchOpcode cpu)
 
 {- decreseTimer cpu
-   Decreses the delay timer and sound timer of the cpu by 1
+   Decrements the delay timer and sound timer of a cpu by 1.
 
-   RETURNS: a new cpu where sound_timer and/or delay_timer are decreesed by 1 if either count is above 0
+   RETURNS: a new cpu where sound_timer and/or delay_timer are decremented by 1 if either count is above 0
    EXAMPLES: decreseTimers (cpu where sound_timer = 6 & delay_timer = 4) = (cpu where sound_timer = 5 & delay_timer = 3)
-             decreseTimers (cpu where sound_timer = 6 & delay_timer = 4) = (cpu where sound_timer = 5 & delay_timer = 3)
+             decreseTimers (cpu where sound_timer = 0 & delay_timer = 3) = (cpu where sound_timer = 0 & delay_timer = 2)
 -}
 decreseTimers :: CPU -> CPU
 decreseTimers cpu = cpu {sound_timer = max 0 (sound_timer cpu - 1), delay_timer = max 0 (delay_timer cpu - 1)}
@@ -42,7 +42,7 @@ decreseTimers cpu = cpu {sound_timer = max 0 (sound_timer cpu - 1), delay_timer 
 {- fetchOpcode cpu
    Fetches an opcode from the memory of a CPU.
 
-   RETURNS: the four hexadecimal values that make up the bytes that (pc cpu) and (pc cpu + 1) 
+   RETURNS: the four hexadecimal values that make up the two bytes that (pc cpu) and (pc cpu + 1) 
             points to in (memory cpu).
    EXAMPLES: fetchOpcode (cpu where (pc cpu and pc cpu + 1) points to [..., 0x12, 0x34, ..]) = (0x1, 0x2, 0x3, 0x4)
              fetchOpcode (cpu where (pc cpu and pc cpu + 1) points to [..., 0xA3, 0xD8, ..]) = (0xA, 0x3, 0xD, 0x8)
@@ -56,10 +56,11 @@ fetchOpcode cpu = (a1, a2, b1, b2)
 {- executeOpcode cpu opcode
    Executes an opcode and alters the state of the CPU it was executed on.
    
-   RETURNS: cpu where opcode has been executed and altered the state of cpu in some way.
-   EXAMPLES: executeOpcode (initialized CPU) (0x0,0x0,0xE,0x0) = (cpu where vram cpu = vram filled with zeroes)
+   RETURNS: a new cpu where opcode has been executed and altered the state of cpu in some way.
+   SIDE EFECTS: throws an exception if opcode is not valid
+   EXAMPLES: executeOpcode (initialized CPU)   (0x0,0x0,0xE,0x0) = (cpu where vram cpu = vram filled with zeroes)
              executeOpcode (cpu where pc = 24) (0x2,0x1,0x2,0x3) = (cpu where sp increased by one, stack cpu !! (sp - 1) = 26 and pc = 0x123)
-             executeOpcode (initialized CPU) (0x6,0x3,0x4,0x9) = (cpu where v cpu !! 0x3 = 0x49)
+             executeOpcode (initialized CPU)   (0x6,0x3,0x4,0x9) = (cpu where v cpu !! 0x3 = 0x49)
 -}
 -- All opcode type signatures have been sourced from the wikipedia article regarding the CHIP-8.
 -- https://en.wikipedia.org/wiki/CHIP-8#Opcode_table
@@ -193,11 +194,11 @@ executeOpcode cpu opcode =
 incPC :: CPU -> CPU
 incPC cpu = cpu {pc = pc cpu + 2}
 
--- Calculates the combined hex value of the first three 4-bit values in an Opcode
+-- Calculates the combined hex value of the first three 4-bit values in an Opcode.
 opNNN :: Opcode -> Int
 opNNN (_, x, y, z) = shift x 8 + shift y 4 + z
 
--- Calculates the combined hex value of the first two 4-bit values in an Opcode
+-- Calculates the combined hex value of the first two 4-bit values in an Opcode.
 opNN :: Opcode -> Int
 opNN (_, _, x, y) = shift x 4 + y
 
@@ -210,20 +211,20 @@ skipInstructionIf :: CPU -> Bool -> CPU
 skipInstructionIf cpu pred | pred      = incPC cpu
                            | otherwise = cpu
 
--- Calls a subroutine by inserting the current position into the stack and jumping to
+-- Calls a subroutine by inserting the current position onto the stack and jumping to
 -- a specific address.
 callSubroutine :: CPU -> Int -> CPU
 callSubroutine cpu = jumpToAddress ucpu
   where ucpu = insertToStack cpu (pc (incPC cpu))
 
 -- Returns from a subroutine by decrementing the stack pointer by 1 and jumping to the stored location
--- in (stack cpu !! sp cpu).
+-- in (stack cpu !! (sp cpu - 1)).
 returnFromSubroutine :: CPU -> CPU
 returnFromSubroutine cpu = jumpToAddress ucpu (stack ucpu !! sp ucpu)
   where ucpu = cpu {sp = sp cpu - 1}
 
--- Inserts a given value into the stack where the stack pointer points to,
--- and increases the stack pointer by 1.
+-- Inserts a given value onto the stack where the stack pointer points to,
+-- and increments the stack pointer by 1.
 insertToStack :: CPU -> Int -> CPU
 insertToStack cpu val = ucpu {sp = sp cpu + 1}
   where ucpu = cpu {stack = Util.replace (sp cpu) val (stack cpu)}
@@ -240,7 +241,7 @@ setMemory cpu pos val = cpu {memory = Util.replace pos val (memory cpu)}
    Shifts the value of a register to the left by 1 bit.
 
    PRE: 0 <= idx < 16
-   RETURNS: cpu where (v cpu !! idx) = shiftL (v cpu !! idx)  1 and (v cpu !! 0xF) has been set to
+   RETURNS: cpu where (v cpu !! idx) = shiftL (v cpu !! idx) 1 and (v cpu !! 0xF) has been set to
             the MSB of (v cpu !! idx)
    EXAMPLES: shiftRegLeft (cpu where (v cpu !! 0) = 10)    0 = (cpu where (v cpu !! 0) = 20) and (v cpu !! 0xF) = 0
              shiftRegLeft (cpu where (v cpu !! 0) = 0xFF)  0 = (cpu where (v cpu !! 0) = 254) and (v cpu !! 0xF) = 1
@@ -252,7 +253,7 @@ shiftRegLeft cpu idx = setRegister ucpu idx $ shiftL (v cpu !! idx) 1 `mod` 256
 {- shiftRegRight cpu idx
    Shifts the value of a register to the right by 1 bit.
 
-   PRE: idx is a single number in base16
+   PRE: idx is a single hexadecimal number.
    RETURNS: cpu where (v cpu !! idx) = shiftR (v cpu !! idx) 1 and (v cpu !! 0xF) has been set to
             the LSB of (v cpu !! idx)
    EXAMPLES: shiftRegRight (cpu where (v cpu !! 0) = 10) = (cpu where (v cpu !! 0) = 5) and (v cpu !! 0xF) = 0
@@ -263,10 +264,10 @@ shiftRegRight cpu idx = setRegister ucpu idx $ shiftR (v cpu !! idx) 1
   where ucpu = setRegister cpu 0xF ((v cpu !! idx) .&. 1)
 
 {- storeBCDRepresentation cpu idx
-   Stores the binary-coded decimal representation of a number in the stack to memory.
+   Stores the binary-coded decimal representation of a number to memory.
 
-   PRE: idx is a single number in base16
-   RETURNS: cpu where the number in (v cpu !! idx) has been offloaded to the memory starting at position (i cpu)
+   PRE: idx is a single hexadecimal number.
+   RETURNS: cpu where the number in (v cpu !! idx) has been offloaded to the memory starting at position (i cpu).
    EXAMPLES: storeBCDRepresentation (cpu where v cpu !! 0x0 = 231) 0x0 = (cpu where part of memory contains [..., 2, 3, 1, ...])
              storeBCDRepresentation (cpu where v cpu !! 0x0 = 194) 0x0 = (cpu where part of memory contains [..., 1, 9, 4, ...])
 -}
@@ -283,7 +284,7 @@ storeRegisters cpu idx | idx == 0  = ucpu
                        | otherwise = storeRegisters ucpu (idx - 1)
                          where ucpu = setMemory cpu (i cpu + idx) (v cpu !! idx)
 
--- Transfers the copied register values from memory back into (v cpu).
+-- Transfers the copied register values from memory back into (v cpu) starting at position (i cpu).
 loadRegisters :: CPU -> Int -> CPU
 loadRegisters cpu idx | idx == 0  = ucpu
                       | otherwise = loadRegisters ucpu (idx - 1)
@@ -292,7 +293,7 @@ loadRegisters cpu idx | idx == 0  = ucpu
 {- generateRandomValue cpu idx andVal
    Sets a register to a random value.
 
-   PRE: andVal > 0, idx is a single number in base16
+   PRE: andVal > 0, idx is a single hexadecimal number.
    RETURNS: cpu where (v cpu !! idx) has been set to ((a random number) .&. andVal)
    EXAMPLES: generateRandomValue cpu 0x0 0x25 = (cpu where (v cpu !! 0x0)) = (random number) .&. 0x25
              generateRandomValue cpu 0xA 0x8C = (cpu where (v cpu !! 0xA)) = (random number) .&. 0x8C
@@ -308,7 +309,7 @@ generateRandomValue cpu idx andVal =
    Checks if any keys are pressed and if so sets the value of a register to the 
    index of the first pressed key.
 
-   PRE: regIndex is a single number in base16
+   PRE: regIndex is a single hexadecimal number.
    RETURNS: unaltered cpu if there are no registered keys, otherwise cpu where (v cpu) !! regIndex
             has been set to the index of the first registered key.
    EXAMPLES: checkIfInput (cpu where number 1 is the only key pressed)         0x6 = (cpu where (v cpu) !! 0x6 = 0x0)

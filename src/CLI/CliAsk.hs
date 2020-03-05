@@ -7,10 +7,10 @@ import System.Environment
 import System.IO
 
 {- getRomInfo usingCabal
-   Asks the user to chose a game found in the specified path and fetches the relative path to that game.
+   Asks the user to choose a rom found in the specified path and fetches the relative path to that rom.
 
    PRE: there are files in "roms" folder
-   RETURNS: the relative path to a game
+   RETURNS: the relative path to a rom
    SIDE EFFECTS: lists all files found in path, 
                  exception thrown if "roms" folder does not exist
    EXAMPLES: getRomInfo False (Input TANK) == "../roms/TANK"

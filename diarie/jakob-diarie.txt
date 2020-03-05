@@ -66,3 +66,7 @@
 
 03/03 16:00 - 19:00
 - Skrev i projekt dokumentationen (skrev om delar, skrev om varför vi valde Gloss)
+
+05/03 14:00 - 18:00
+- Små fixar överallt
+- Gjort klart projektet inför inläming

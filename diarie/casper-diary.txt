@@ -8,7 +8,7 @@ Planering i gruppen där vi strukturerade upp projektet i delar, delade ut arbet
 
 2020-02-21 13:15-13:30
 
-Möte med coach sanna där vi diskuterade projektet.
+Möte med coach Sanna där vi diskuterade projektet.
 
 2020-02-21 13:30-14:00
 
@@ -27,7 +27,7 @@ Funktionspecifikation för majoriteten av de skrivna funktionerna
 
 2020-02-24 14:15-14:45
 
-Bortagning av osäkra funktioner och primitiv initialisering av CPUn.
+Bortagning av osäkra funktioner, returnerar nu igen IO [Int].Primitiv initialisering av CPUn tillagd.
 
 2020-02-25 11:00-13:00 
 
@@ -45,7 +45,6 @@ Arbete i gruppen:
 	Grafik kopplades ihop med resten av programet.
 	Tangetbordsinläsningar kopplades ihop.
 	Felsökning och optimisiering av olika funktioner.
-	Lunch.
 	Rapportskrivande.
 
 2020-02-27 14:00-15:00
@@ -77,3 +76,17 @@ Arbete i gruppen:
 	Rapportskrivande, tabellskapande och flowchartskapande.
 	Nu är vi nästan klara med innehållet, det finns lite kvar men är i princip klart.
 	Suttit i gruppsamtal och förtydligat olika delar av innehållet med varandra.
+
+2020-03-03 14:00-15:00
+	Rapportskrivande.
+
+2020-03-04 13:00-13:30
+	Små ändringar i rapporten.
+
+2020-03-05 14:00-18:00
+
+	Byte av datarepresantion i emulatorn från Int till Word8.
+	Upptäckte att mängden fel och de ändringar som skulle krävas var för stort för att hinna med inom tidsramen.
+	Kontrollering av all kod och småändringar.
+	Sista kontroll och småändringar av rapporten.
+	Inlämning.

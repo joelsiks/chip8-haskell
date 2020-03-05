@@ -8,11 +8,11 @@ import Control.Lens ((.~), element)
    Converts a byte into two 4-bit values.
 
    PRE: 0 <= num <= 255
-   RETURNS: (0xX, 0xY) where input is 0xXY
+   RETURNS: (0xA, 0xB) where input is 0xAB
    EXAMPLES: splitByte 0xAF = (0xA, 0xF)
              splitByte 0xB3 = (0xB, 0x3)
              splitByte 0x12 = (0x1, 0x2)
-             splitByte 0x0 = (0x0, 0x0)
+             splitByte 0x1 = (0x0, 0x1)
 -}
 splitByte :: Int -> (Int, Int)
 splitByte num = (n1, n2)
@@ -23,8 +23,8 @@ splitByte num = (n1, n2)
 {- replace idx val list
    Replaces a value at a given index in a list with another value.
 
-   PRE: 0 <= idx <= length list
-   RETURNS: list where the value at index idx has been replaced with val.
+   PRE: 0 <= idx < length list
+   RETURNS: list where the value at idx has been replaced with val.
    EXAMPLES: replace 0 3 [1,2,3] = [3,2,3]
              replace 1 3 [1,1,1] = [1,3,1]
 -}

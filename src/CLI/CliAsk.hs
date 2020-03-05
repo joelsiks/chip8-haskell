@@ -7,14 +7,14 @@ import System.Environment
 import System.IO
 
 {- getRomInfo usingCabal
-   Asks the user to choose a ROM found in the specified path and fetches the relative path to that ROM.
+   Asks the user to choose a ROM found in the specified path and fetches the relative path to that rom.
 
-   PRE: "ROMs" folder exists,
-        there are files in "ROMs" folder
-   RETURNS: the relative path to a ROM
-   SIDE EFFECTS: prints all files found in path, 
-   EXAMPLES: getRomInfo False (Input TANK) == "../ROMs/TANK"
-             getRomInfo True (Input TANK)  == "ROMs/TANK"
+   PRE: there are files in "roms" folder
+   RETURNS: the relative path to a rom
+   SIDE EFFECTS: lists all files found in path, 
+                 exception thrown if "roms" folder does not exist
+   EXAMPLES: getRomInfo False (Input TANK) == "../roms/TANK"
+             getRomInfo True (Input TANK)  == "roms/TANK"
 -}
 getRomInfo :: Bool -> IO (String, Int)
 getRomInfo iscabal = do

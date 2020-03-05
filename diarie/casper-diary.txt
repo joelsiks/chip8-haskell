@@ -87,5 +87,6 @@ Arbete i gruppen:
 
 	Byte av datarepresantion i emulatorn från Int till Word8.
 	Upptäckte att mängden fel och de ändringar som skulle krävas var för stort för att hinna med inom tidsramen.
+	Kontrollering av all kod och småändringar.
 	Sista kontroll och småändringar av rapporten.
 	Inlämning.

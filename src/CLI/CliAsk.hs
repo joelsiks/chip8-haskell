@@ -7,25 +7,25 @@ import System.Environment
 import System.IO
 
 {- getRomInfo usingCabal
-   Asks the user to chose a game found in the specified path and fetches the relative path to that game.
+   Asks the user to choose a ROM found in the specified path and fetches the relative path to that ROM.
 
-   PRE: there are files in "roms" folder
-   RETURNS: the relative path to a game
-   SIDE EFFECTS: lists all files found in path, 
-                 exception thrown if "roms" folder does not exist
-   EXAMPLES: getRomInfo False (Input TANK) == "../roms/TANK"
-             getRomInfo True (Input TANK)  == "roms/TANK"
+   PRE: "ROMs" folder exists,
+        there are files in "ROMs" folder
+   RETURNS: the relative path to a ROM
+   SIDE EFFECTS: prints all files found in path, 
+   EXAMPLES: getRomInfo False (Input TANK) == "../ROMs/TANK"
+             getRomInfo True (Input TANK)  == "ROMs/TANK"
 -}
 getRomInfo :: Bool -> IO (String, Int)
 getRomInfo iscabal = do
-  let pathStart = if iscabal then "roms/" else "../roms/"
+  let pathStart = if iscabal then "ROMs/" else "../ROMs/"
   options <- listDirectory pathStart
   game    <- askForFile (reverse options)
   return (pathStart ++ game, getFPS game)
 
 {- askForFile path options
-   Repeatedly asks the user to chose one of the games of the given options and 
-   repeats the question if input is invalid. Returns the chosen games relative 
+   Repeatedly asks the user to chose one of the ROMs of the given options and 
+   repeats the question if input is invalid. Returns the chosen ROMs relative 
    path and fps.
 
    PRE: options is not empty, path exists
@@ -36,7 +36,7 @@ getRomInfo iscabal = do
 -}
 askForFile :: [String] -> IO String
 askForFile options = do
-  putStrLn $ "Available games: " ++ buildString options
+  putStrLn $ "Available ROMs: " ++ buildString options
   putStr "Type in the ROM you would like to launch: "
   hFlush stdout
   inputStr <- getLine
@@ -49,9 +49,9 @@ askForFile options = do
     askForFile options
 
 {- getFPS name
-   Gets the predefiend fps for a rom with the given name or 100.
+   Gets the predefined fps for a ROM with the given name or returns the default value 100.
 
-   RETURNS: returns the relative fps to name or 100
+   RETURNS: returns the relative fps to name or the default value 100
    EXAMPLES: getFPS "PONG" == 60
              getFPS "X"    == 100
 -}
@@ -61,17 +61,16 @@ getFPS key = findInList key list
     list = [("15PUZZLE",320),("BLINKY",600),("CONNECT4",50),("HIDDEN", 80),("KALEID",600),("MAZE",300),("PONG",300),("TETRIS",120),("TICTAC",80),("VERS",120)]
     -- Matches a given key to a list value
     findInList :: String -> [(String, Int)] -> Int
-    -- VARIANT: length list
     findInList str ((key,fps):xs)
       | str == key = fps
       | otherwise  = findInList str xs
     findInList _ _   = 100
 
 {- buildString list
-   Formats a list into a nice looking text.
+   Formats a list into a nice looking string.
 
    PRE: list is not empty
-   RETURNS: list formated into a nice looking text
+   RETURNS: a string with each element in list separated with ", "
    EXAMPLES: buildString ["hej"]      == "hej"
              buildString ["hej", "a"] == "hej, a"
 -}

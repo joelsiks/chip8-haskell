@@ -135,3 +135,8 @@ gruppmedlemmarna.
 Skrivit om delar av rapporten där vi inte har varit tydliga nog.
 Förövrigt jobbat med rapporten i alla dess delar.
 
+05/03 14:00-18:00
+Gjort sista ändringar i koden gällande struktur och tydlighet i specifikationer.
+Skrivit klart på rapporten.
+Fixat in i det sista.
+
